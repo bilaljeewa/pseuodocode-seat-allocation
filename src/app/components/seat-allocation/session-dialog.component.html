@@ -1,0 +1,51 @@
+<div class="session-create-custom pseudoSeatAllocation">
+  <ngx-loading [show]="isLoading"></ngx-loading>
+  <h2 mat-dialog-title class="text-center">{{data.session ? 'Edit' : 'Add'}} Session</h2>
+  <mat-dialog-content class="sessionModal">
+    <mat-form-field class="fld d-block">
+      <mat-label>Session Name</mat-label>
+      <input matInput [(ngModel)]="SessionName" [ngModelOptions]="{standalone: true}">
+    </mat-form-field>
+    <mat-error *ngIf="!SessionName && errorMessage">Please enter Session Name</mat-error>
+    <div class="multi-select-drop">
+      <label class="mt-lg-2 mb-0 mt-md-0" for="">Session Programs</label>
+      <ng-multiselect-dropdown color="accent" class="w-100" [data]="data.programs" [(ngModel)]="sessionPrograms"
+        [settings]="dropdownSettings">
+      </ng-multiselect-dropdown>
+      <mat-error *ngIf="sessionPrograms.length == 0 && errorMessage">Please select Session Programs</mat-error>
+    </div>
+
+    <!-- <div class="d-block individual-list">
+      <div class="media">
+        <div class="icon-wrap">
+          <fa-icon class="exclaim" [icon]="faExclamationTriangle"></fa-icon>
+        </div>
+        <div class="media-body">
+          <p>Changes will remove allocation of following individuals</p>
+          <ul class="m-0 p-0">
+            <li>
+              <fa-icon class="exclaim" [icon]="faCaretRight"></fa-icon>Tom Jones
+            </li>
+            <li>
+              <fa-icon class="exclaim" [icon]="faCaretRight"></fa-icon>Tom Jones
+            </li>
+            <li>
+              <fa-icon class="exclaim" [icon]="faCaretRight"></fa-icon>Tom Jones
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div> -->
+
+  </mat-dialog-content>
+  <mat-dialog-actions align="end" class="m-0 p-0">
+    <div class="button-wrap pt-3 pt-lg-4 pb-1 text-right">
+      <button *ngIf="data.session" mat-raised-button color="warn" (click)="onDelete()">Delete</button>
+      <button mat-raised-button class="mx-2" (click)="onClose()">Cancel</button>
+      <button mat-raised-button color="primary" (click)="saveSession()">
+        <ng-container *ngIf="data.session; else elseTemplate"> Update </ng-container>
+        <ng-template #elseTemplate> Save </ng-template>
+      </button>
+    </div>
+  </mat-dialog-actions>
+</div>

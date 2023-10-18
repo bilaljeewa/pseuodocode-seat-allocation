@@ -1,0 +1,353 @@
+<div class="pseudoSeatAllocation">
+    <div class="form-wrap">
+        <ngx-loading [show]="isLoading"></ngx-loading>
+        <h1 class="heading-main mb-2 mb-sm-3 mb-md-4 text-center">Session</h1>
+        <div class="button-wrap text-right mb-2 mb-md-3">
+            <button mat-raised-button color="primary" (click)="openSessionDialog(); do($event);">
+                Add Session</button>
+        </div>
+        <mat-accordion>
+            <div class="session-wrap mb-3 mb-sm-4" *ngFor="let item of advancedSessions; let i=index;trackBy: identifyer">
+                <!--EXPANSION HEAD-->
+                <div class="session-list p-3">
+                    <div class="row form-row">
+                        <div class="mb-2 mb-xl-0 media-title col-xl-2 col-lg-12">
+                            <h2 class="heading m-0 "> {{item.SessionName}}</h2>
+                        </div>
+                        <div class="session-body col-xl-10 col-lg-12">
+                            <div class="row form-row">
+                                <div class="col-lg-3 col-md-4">
+                                    <mat-chip-list class="sessionProgramsChips w-100">
+                                        <mat-chip *ngFor="let program of item.programNames; let k = index;">
+                                            {{program}}
+                                            <!-- <mat-icon matChipRemove (click)="removeSessionProgram(k, i)">
+                                            cancel </mat-icon> -->
+                                        </mat-chip>
+                                    </mat-chip-list>
+                                </div>
+                                <div class="col-lg-7 col-md-8 session-inner-list mb-2 mb-md-0 mb-sm-3">
+                                    <div class="row form-row align-items-center h-100">
+                                        <div class="col-sm-3 col-6 mb-2 mb-sm-0">
+                                            <div class="list-wrap text-center border">
+                                                <h3>{{item.TotalTables}}</h3>
+                                                <p>Tables</p>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-3 col-6 mb-2 mb-sm-0">
+                                            <div class="list-wrap text-center border">
+                                                <h3>{{item.TotalSeats}}</h3>
+                                                <p>Total Seats</p>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-3 col-6 mb-2 mb-sm-0">
+                                            <div class="list-wrap text-center border">
+                                                <h3>{{item.TotalAllocated}}</h3>
+                                                <p>Allocated</p>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-3 col-6 mb-2 mb-sm-0">
+                                            <div class="list-wrap text-center border">
+                                                <h3>{{item.TotalUnallocated}}</h3>
+                                                <p>Unallocated</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-2 col-md-12 ">
+                                    <div
+                                        class="d-flex align-items-center justify-content-lg-center justify-content-end h-100 action">
+                                        <button mat-icon-button style="color: green;" (click)="do($event);"
+                                            *ngIf="item.TotalUnallocated == 0">
+                                            <fa-icon class="exclaim" [icon]="faCheckCircle"></fa-icon>
+                                        </button>
+                                        <button mat-icon-button color="warn" (click)="do($event);"
+                                            *ngIf="item.TotalUnallocated > 0">
+                                            <fa-icon class="exclaim" [icon]="faExclamationTriangle"></fa-icon>
+                                        </button>
+                                        <button mat-raised-button color="primary" class="mx-2"
+                                            (click)="openSessionDialog(item, i); do($event);">Edit</button>
+                                        <!--EXPANSION ICON-->
+                                        <button mat-icon-button color="primary"
+                                            (click)="mainExpansionPanel.toggle(); do($event);">
+                                            <ng-container *ngIf="mainPanelIcon === i; else elseTemplate">
+                                                <fa-icon class="carett" [icon]="faCaretUp"></fa-icon>
+                                            </ng-container>
+                                            <ng-template #elseTemplate>
+                                                <fa-icon class="carett" [icon]="faCaretDown"></fa-icon>
+                                            </ng-template>
+                                        </button>
+                                    </div>
+                                </div>
+                                <!--EXPANSION HEAD END-->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!--EXPANSION HEAD END-->
+                <!--EXPANDED BODY-->
+                <mat-expansion-panel class="border border-top-0" #mainExpansionPanel [hideToggle]="true"
+                    (afterCollapse)="afterPanelClosed(i)" (afterExpand)="afterPanelOpened(i)">
+                    <div class="session-open mt-3 ">
+                        <div class="session-open-wrap">
+                            <div class="row">
+                                <div class="col-lg-5 mb-3 mb-lg-0">
+                                    <div class="side-list-wrap p-2 p-sm-3">
+                                        <div class="top-tabs">
+                                            <mat-tab-group dynamicHeight>
+                                                <mat-tab label="Unallocated">
+                                                    <div class="py-2 py-md-3">
+                                                        <div class="button-wrap text-right">
+                                                            <button mat-raised-button color="primary" class="ml-2 mb-2"
+                                                                *ngIf="item.unallocatedRegistrants && item.unallocatedRegistrants.length>0 && item.tables && item.tables.length>0 && !item.multiSelectChecked && !item.multiSelectIndeterminate && item.tableOpened == null"
+                                                                (click)="autoAssignAll(i); do($event);">
+                                                                Auto Assign All</button>
+                                                            <button mat-raised-button color="primary" class="ml-2 mb-2"
+                                                                *ngIf="item.unallocatedRegistrants && item.unallocatedRegistrants.length>0 && item.tables && item.tables.length>0 && item.tableOpened != null && !item.multiSelectChecked && !item.multiSelectIndeterminate"
+                                                                (click)="autoAssignAllToTable(i); do($event);">
+                                                                Auto Assign To {{item.tableOpened.TableName}}</button>
+                                                            <button mat-raised-button color="primary" class="ml-2 mb-2"
+                                                                *ngIf="item.unallocatedRegistrants && item.unallocatedRegistrants.length>0 && item.tables && item.tables.length>0 && item.tableOpened != null && (item.multiSelectChecked || item.multiSelectIndeterminate)"
+                                                                (click)="manualAssignAllToTable(i); do($event);">
+                                                                Assign Selection To
+                                                                {{item.tableOpened.TableName}}</button>
+                                                        </div>
+                                                        <div class="table-wrap">
+                                                            <div class="table-responsive heightScroll">
+                                                                <table class="mat-table table mb-0">
+                                                                    <thead>
+                                                                        <tr>
+                                                                            <th scope="col" class="image-th">
+                                                                                <mat-checkbox
+                                                                                    [(ngModel)]="item.multiSelectChecked"
+                                                                                    [(indeterminate)]="item.multiSelectIndeterminate"
+                                                                                    (change)="selectUnselectMultiSelect(item.multiSelectChecked ? true : false, i)">
+                                                                                </mat-checkbox>
+                                                                            </th>
+                                                                            <th scope="col" class="name-th">Name</th>
+                                                                            <th scope="col" class="mail-th"></th>
+                                                                        </tr>
+                                                                    </thead>
+                                                                    <tbody>
+                                                                        <tr
+                                                                            *ngFor="let itemRow of item.unallocatedRegistrants;">
+                                                                            <td>
+                                                                                <mat-checkbox
+                                                                                    [(ngModel)]="itemRow.multiSelect"
+                                                                                    (change)="multiSelectCheckBoxes(i);">
+                                                                                </mat-checkbox>
+                                                                            </td>
+                                                                            <td>{{ itemRow.RegistrantName }}
+                                                                            </td>
+                                                                            <td>
+                                                                                <button (click)="do($event)" mat-icon-button color="primary"
+                                                                                    [matTooltip]="itemRow.RegistrantName"
+                                                                                    matTooltipPosition="left">
+                                                                                    <fa-icon class="exclaim"
+                                                                                        [icon]="faInfo"></fa-icon>
+                                                                                </button>
+                                                                            </td>
+                                                                        </tr>
+                                                                    </tbody>
+                                                                </table>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </mat-tab>
+                                                <mat-tab label="Allocated">
+                                                    <div class="py-2 py-md-3">
+                                                        <div class="table-wrap">
+                                                            <div class="table-responsive heightScroll">
+                                                                <table class="mat-table table mb-0">
+                                                                    <thead>
+                                                                        <tr>
+                                                                            <th scope="col" class="name-th">Name</th>
+                                                                            <th scope="col" class="name-th">Table</th>
+                                                                            <th scope="col" class="mail-th"></th>
+                                                                        </tr>
+                                                                    </thead>
+                                                                    <tbody>
+                                                                        <tr
+                                                                            *ngFor="let itemRow of item.allocatedRegistrants;">
+                                                                            <td>{{ itemRow.RegistrantName }}</td>
+                                                                            <td>{{ itemRow.tableName }}</td>
+                                                                            <td>
+                                                                                <button (click)="do($event)" mat-icon-button color="primary"
+                                                                                    [matTooltip]="itemRow.RegistrantName"
+                                                                                    matTooltipPosition="left" disabled>
+                                                                                    <fa-icon class="exclaim"
+                                                                                        [icon]="faInfo"></fa-icon>
+                                                                                </button>
+                                                                            </td>
+                                                                        </tr>
+                                                                    </tbody>
+                                                                </table>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </mat-tab>
+                                            </mat-tab-group>
+                                            <div class="refresh-btn">
+                                                <button (click)="do($event);" mat-icon-button color="primary">
+                                                    <fa-icon class="exclaim" [icon]="faSyncAlt"></fa-icon>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-lg-7">
+                                    <div class="table-list-wrap p-2 p-sm-3">
+                                        <div
+                                            class="top-buttons d-flex align-items-center justify-content-end mb-2 mb-md-3">
+                                            <button mat-raised-button (click)="openNewTab(i); do($event);">
+                                                <span>Print</span>
+                                                <fa-icon class="mx-2 printpdf" [icon]="faFilePdf"></fa-icon>
+                                            </button>
+                                            <button mat-raised-button color="primary" class="ml-2"
+                                                (click)="addEditSessionTable(i); do($event);">Add Table</button>
+                                        </div>
+                                        <mat-accordion>
+                                            <div class="table-list-inner mb-2"
+                                                *ngFor="let tableItem of item.tables; let j=index">
+                                                <div class="table-top p-2"
+                                                    [ngStyle]="{'border': '1px solid' + tableItem.Colour}">
+                                                    <h4 class="table-head">Table "{{tableItem.TableName}}"</h4>
+                                                    <div class="table-in">
+                                                        <div class="row form-row align-items-center">
+                                                            <div class="col-sm-2">
+                                                                <div class="count-wrap">
+                                                                    <span
+                                                                        class="d-flex align-items-center justify-content-center"
+                                                                        [style.background]="tableItem.Colour"
+                                                                        style="color: white;">
+                                                                        {{ tableItem.NumSeats }}
+                                                                    </span>
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-sm-7 allocated">
+                                                                <p
+                                                                    class="py-1 m-0 d-flex justify-content-between alloc">
+                                                                    <span class="title">Allocated Seats</span>
+                                                                    <span class="badgee"
+                                                                        [style.color]="tableItem.Colour"
+                                                                        style="background: white;">{{tableItem.tablesAllocatedRegistrants && tableItem.tablesAllocatedRegistrants.length}}</span>
+                                                                </p>
+                                                                <p
+                                                                    class="py-1 m-0 d-flex justify-content-between unalloc">
+                                                                    <span class="title"
+                                                                        *ngIf="tableItem.remainingUnallocatedRegistrantsSeats > 0">Unallocated
+                                                                        Seats</span>
+                                                                    <span class="badgee"
+                                                                        *ngIf="tableItem.remainingUnallocatedRegistrantsSeats > 0">{{tableItem.remainingUnallocatedRegistrantsSeats}}</span>
+
+                                                                    <span class="title"
+                                                                        *ngIf="tableItem.remainingUnallocatedRegistrantsSeats == 0"></span>
+                                                                    <span class="badgee"
+                                                                        *ngIf="tableItem.remainingUnallocatedRegistrantsSeats == 0"
+                                                                        style="background: green; color: white;">Full</span>
+                                                                </p>
+                                                            </div>
+                                                            <div class="col-sm-3 color-pick text-right">
+                                                                <div
+                                                                    class="d-flex align-items-center justify-content-end">
+                                                                    <div class="color-btn">
+                                                                        <p>
+                                                                            <input matInput
+                                                                                [style.background]="tableItem.Colour"
+                                                                                [colorPicker]="tableItem.Colour"
+                                                                                cpPosition="bottom-left"
+                                                                                (colorPickerChange)="tableItem.Colour=$event">
+                                                                        </p>
+                                                                        <button mat-raised-button color="primary"
+                                                                            (click)="addEditSessionTable(i, j); do($event);">Edit</button>
+                                                                    </div>
+                                                                    <div class="toggle-up ml-2">
+                                                                        <button mat-icon-button color="primary"
+                                                                            (click)="innerExpansionPanel.toggle(); do($event);">
+                                                                            <ng-container
+                                                                                *ngIf="innerPanelIcon === j; else elseTemplate">
+                                                                                <fa-icon [icon]="faChevronUp"></fa-icon>
+                                                                            </ng-container>
+                                                                            <ng-template #elseTemplate>
+                                                                                <fa-icon [icon]="faChevronDown">
+                                                                                </fa-icon>
+                                                                            </ng-template>
+                                                                        </button>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <mat-expansion-panel #innerExpansionPanel [hideToggle]="true"
+                                                    (afterCollapse)="innerPanelClosed(i, j)"
+                                                    (afterExpand)="innerPannelOpened(i, j)">
+
+
+                                                    <!-- <div style="height: 600px; overflow-y: scroll" cdkScrollable>
+                                                        <div cdkDropList class="example-list" >
+                                                            <div class="example-box" *ngFor="let movie of movies" cdkDrag>{{movie}}</div>
+                                                        </div>
+                                                    </div> -->
+
+
+                                                    <div class="table-wrap py-3 py-sm-3 d-block" >
+                                                        <div class="table-responsive heightScrollInner" cdkScrollable>
+                                                            <table class="mat-table table mb-0" >
+                                                                <thead>
+                                                                    <tr>
+                                                                        <th scope="col" class="image-th"></th>
+                                                                        <th scope="col" class="name-th">Name</th>
+                                                                        <th scope="col" class="mail-th">Action</th>
+                                                                    </tr>
+                                                                </thead>
+                                                                <tbody cdkDropList 
+                                                                    (cdkDropListDropped)="drop($event, i, j)">
+                                                                    <tr *ngFor="let innerTableInner of tableItem.tablesAllocatedRegistrants"
+                                                                        cdkDrag>
+                                                                        <td>
+                                                                            <span
+                                                                                class="icon-wrap d-flex align-items-center justify-content-center">
+                                                                                {{ innerTableInner.RegistrantName | slice:0:2 }}
+                                                                            </span>
+                                                                        </td>
+                                                                        <td>{{ innerTableInner.RegistrantName }}</td>
+                                                                        <td>
+                                                                            <button (click)="do($event)" mat-icon-button color="primary"
+                                                                                [matTooltip]="innerTableInner.RegistrantName"
+                                                                                matTooltipPosition="left">
+                                                                                <fa-icon class="exclaim"
+                                                                                    [icon]="faInfo">
+                                                                                </fa-icon>
+                                                                            </button>
+                                                                            <button mat-icon-button color="warn"
+                                                                                (click)="deleteRegistrantFromTable(i, innerTableInner); do($event);">
+                                                                                <fa-icon class="exclaim"
+                                                                                    [icon]="faTrashAlt">
+                                                                                </fa-icon>
+                                                                            </button>
+                                                                            <button mat-icon-button color="primary">
+                                                                                <fa-icon class="exclaim"
+                                                                                    [icon]="faEllipsisV">
+                                                                                </fa-icon>
+                                                                            </button>
+                                                                        </td>
+                                                                    </tr>
+                                                                </tbody>
+                                                            </table>
+                                                        </div>
+                                                    </div>
+                                                </mat-expansion-panel>
+                                            </div>
+                                        </mat-accordion>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </mat-expansion-panel>
+                <!--EXPANDED BODY END-->
+            </div>
+        </mat-accordion>
+    </div>
+</div>

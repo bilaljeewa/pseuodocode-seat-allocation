@@ -1,0 +1,36 @@
+<div class="pseudoSeatAllocation">
+    <ngx-loading [show]="isLoading"></ngx-loading>
+    <h2 mat-dialog-title class="text-center">Table <span
+            *ngIf="data.sessionTable?.TableName">"{{data.sessionTable.TableName}}"</span>
+    </h2>
+    <mat-dialog-content>
+        <form [formGroup]="tableForm" novalidate autocomplete="off">
+            <mat-form-field class="fld d-block">
+                <mat-label>Table Name</mat-label>
+                <input matInput formControlName="TableName">
+                <mat-error *ngIf="TableName.hasError('required')">Please enter a Table Name</mat-error>
+            </mat-form-field>
+
+            <mat-form-field class="fld d-block">
+                <mat-label>No. of Seats</mat-label>
+                <input matInput formControlName="NumSeats">
+                <mat-error *ngIf="NumSeats.hasError('required')">Please enter No. of Seats</mat-error>
+                <mat-error *ngIf="NumSeats.hasError('pattern')">No. of Seats should be in numbers</mat-error>
+                <mat-error *ngIf="NumSeats.hasError('min')">No. of Seats should be greater than 0</mat-error>
+            </mat-form-field>
+
+            <mat-form-field class="fld d-block">
+                <input matInput [style.background]="tableForm.value.Colour" [colorPicker]="tableForm.value.Colour"
+                    cpPosition="bottom" (colorPickerChange)="getColor($event)">
+            </mat-form-field>
+        </form>
+        <div class="button-wrap pt-3 pt-lg-4 pb-1 text-right">
+            <button *ngIf="data.sessionTable" mat-raised-button color="warn" (click)="onDelete()">Delete</button>
+            <button mat-raised-button class="mx-2" (click)="onClose()">Cancel</button>
+            <button mat-raised-button color="primary" (click)="saveSessionTable()">
+                <ng-container *ngIf="data.sessionTable; else elseTemplate"> Update </ng-container>
+                <ng-template #elseTemplate> Save </ng-template>
+            </button>
+        </div>
+    </mat-dialog-content>
+</div>

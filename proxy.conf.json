@@ -1,0 +1,28 @@
+{
+
+    "/api/*": {
+        "target": "https://apdemoaisp4.imiscloud.com/",
+        "secure": false,
+        "logLevel": "debug",
+        "changeOrigin": true
+    },
+    "/AsiCommon/*": {
+        "target": "https://apdemoaisp4.imiscloud.com/",
+        "secure": false,
+        "logLevel": "debug",
+        "changeOrigin": true
+    },
+    "/assets/*": {
+        "target": "https://apdemoaisp4.imiscloud.com/",
+        "secure": false,
+        "logLevel": "debug",
+        "changeOrigin": true
+    },
+    "/images/*": {
+        "target": "https://apdemoaisp4.imiscloud.com/",
+        "secure": false,
+        "logLevel": "debug",
+        "changeOrigin": true
+    }
+
+}
