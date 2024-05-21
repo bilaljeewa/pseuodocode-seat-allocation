@@ -13,6 +13,10 @@ import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
   styleUrls: ['./seat-allocation.component.scss']
 })
 export class SeatAllocationComponent implements OnInit {
+
+  envMode='2017'
+  selectedPartyId= JSON.parse(document.getElementById('__ClientContext')['value']).selectedPartyId
+
   identifyer = (index:number, item: any) => item.name;
   movies = [
     "Episode I - The Phantom Menace",
@@ -274,26 +278,10 @@ export class SeatAllocationComponent implements OnInit {
                 result.map((ele, index) => {
                   let RegistrantID = ele.Properties.$values.filter(ele1 => ele1.Name == 'RegistrantID');
                   let FullName = ele.Properties.$values.filter(ele1 => ele1.Name == 'FullName');
-                  RegistrantsDetails.push({
+                  let tempData= {
                     "$type": "Asi.Soa.Core.DataContracts.GenericEntityData, Asi.Contracts",
-                    "EntityTypeName": "Psc_Event_Registrant",
-                    "PrimaryParentEntityTypeName": "Standalone",
-                    "Identity": {
-                      "$type": "Asi.Soa.Core.DataContracts.IdentityData, Asi.Contracts",
-                      "EntityTypeName": "Psc_Event_Registrant",
-                      "IdentityElements": {
-                        "$type": "System.Collections.ObjectModel.Collection`1[[System.String, mscorlib]], mscorlib",
-                        "$values": [""]
-                      }
-                    },
-                    "PrimaryParentIdentity": {
-                      "$type": "Asi.Soa.Core.DataContracts.IdentityData, Asi.Contracts",
-                      "EntityTypeName": "Standalone",
-                      "IdentityElements": {
-                        "$type": "System.Collections.ObjectModel.Collection`1[[System.String, mscorlib]], mscorlib",
-                        "$values": [""]
-                      }
-                    },
+                    "EntityTypeName": this.envMode == '2017'? 'Psc_Event_Registrant_2017' :'Psc_Event_Registrant',
+                    
                     "Properties": {
                       "$type": "Asi.Soa.Core.DataContracts.GenericPropertyDataCollection, Asi.Contracts",
                       "$values": [{
@@ -337,16 +325,30 @@ export class SeatAllocationComponent implements OnInit {
                       }
                       ]
                     }
-                  })
+                  }
+                  if(this.envMode=='2017' ){
+                    tempData.Properties.$values.push({
+                      "$type":"Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                      "Name":"ContactKey",
+                      "Value":this.selectedPartyId
+                    }
+
+                    )
+                  }
+                  RegistrantsDetails.push(tempData)
+
+                  
                   if (result.length == index + 1) {
                     let increamentedValue = 0;
                     RegistrantsDetails.map((RegistrantElement, RegistrantIndex) => {
+                      console.log('resistant 1')
                       this.seatallocationService.addRegistrant(RegistrantElement).subscribe(
                         RegistrantResult => {
                           increamentedValue = increamentedValue + 1;
                           if (increamentedValue == RegistrantsDetails.length) {
                             this.seatallocationService.getRegistrants(response.data[0].Properties.$values.filter(ele1 => ele1.Name == 'EventID')[0].Value, response.data[0].Properties.$values.filter(ele1 => ele1.Name == 'Ordinal')[0].Value.$value).subscribe(
                               (RegistrantsResult: any) => {
+                                console.log('update session 1')
                                 this.updateSession(response, RegistrantsResult.length);
                               }, RegistrantsError => {
                                 this.toast.error("Something went wrong!! Please try again later!!", "Error");
@@ -404,24 +406,8 @@ export class SeatAllocationComponent implements OnInit {
                             uniqueNewRegistrants.map(ele1 => {
                               let RegistrantsDetails = {
                                 "$type": "Asi.Soa.Core.DataContracts.GenericEntityData, Asi.Contracts",
-                                "EntityTypeName": "Psc_Event_Registrant",
-                                "PrimaryParentEntityTypeName": "Standalone",
-                                "Identity": {
-                                  "$type": "Asi.Soa.Core.DataContracts.IdentityData, Asi.Contracts",
-                                  "EntityTypeName": "Psc_Event_Registrant",
-                                  "IdentityElements": {
-                                    "$type": "System.Collections.ObjectModel.Collection`1[[System.String, mscorlib]], mscorlib",
-                                    "$values": [""]
-                                  }
-                                },
-                                "PrimaryParentIdentity": {
-                                  "$type": "Asi.Soa.Core.DataContracts.IdentityData, Asi.Contracts",
-                                  "EntityTypeName": "Standalone",
-                                  "IdentityElements": {
-                                    "$type": "System.Collections.ObjectModel.Collection`1[[System.String, mscorlib]], mscorlib",
-                                    "$values": [""]
-                                  }
-                                },
+                                "EntityTypeName": this.envMode == '2017'? 'Psc_Event_Registrant_2017' :'Psc_Event_Registrant',
+                                
                                 "Properties": {
                                   "$type": "Asi.Soa.Core.DataContracts.GenericPropertyDataCollection, Asi.Contracts",
                                   "$values": [{
@@ -466,6 +452,16 @@ export class SeatAllocationComponent implements OnInit {
                                   ]
                                 }
                               }
+                              if(this.envMode=='2017' ){
+                                RegistrantsDetails.Properties.$values.push({
+                                  "$type":"Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                                  "Name":"ContactKey",
+                                  "Value":this.selectedPartyId
+                                }
+
+                                )
+                              }
+                              console.log('resistant 2')
                               this.seatallocationService.addRegistrant(RegistrantsDetails).subscribe(
                                 addRegistrantResult => {
                                   uniqueOldRegistrantsCount = uniqueOldRegistrantsCount + 1;
@@ -484,6 +480,13 @@ export class SeatAllocationComponent implements OnInit {
                                         let allocatedRegistrants = updatedRegistrantsResult.filter(ele1 => ele1.SessionID == ele.Ordinal && ele1.TableID != 0);
 
                                         let sessionData = new Array();
+                                        if(this.envMode=='2017'){
+                                          sessionData.push({
+                                            "$type":"Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                                            "Name":"ContactKey",
+                                            "Value":this.selectedPartyId
+                                          })
+                                        }
                                         sessionData.push({
                                           "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
                                           "Name": "Ordinal",
@@ -529,8 +532,8 @@ export class SeatAllocationComponent implements OnInit {
                                           "Name": "SessionTimeStamp",
                                           "Value": response.data[0].Properties.$values.filter(ele5 => ele5.Name == 'SessionTimeStamp')[0].Value
                                         })
-
-                                        this.seatallocationService.updateSession({ sessionID: response.data[0].Properties.$values.filter(ele5 => ele5.Name == 'Ordinal')[0].Value.$value, session: sessionData }).subscribe(
+                                        console.log('update session 2')
+                                        this.seatallocationService.updateSession({ sessionID: response.data[0].Properties.$values.filter(ele5 => ele5.Name == 'Ordinal')[0].Value.$value, session: sessionData ,selectedPartyId: this.selectedPartyId}).subscribe(
                                           result => {
                                             this.getPrograms();
                                           }, error => {
@@ -625,6 +628,7 @@ export class SeatAllocationComponent implements OnInit {
                           ]
                         }
                       }
+                      console.log('resistant 3')
                       this.seatallocationService.addRegistrant(RegistrantsDetails).subscribe(
                         addRegistrantResult => {
                           uniqueOldRegistrantsCount = uniqueOldRegistrantsCount + 1;
@@ -643,6 +647,13 @@ export class SeatAllocationComponent implements OnInit {
                                 let allocatedRegistrants = updatedRegistrantsResult.filter(ele1 => ele1.TableID != 0);
 
                                 let sessionData = new Array();
+                                if(this.envMode=='2017'){
+                                  sessionData.push({
+                                    "$type":"Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                                    "Name":"ContactKey",
+                                    "Value":this.selectedPartyId
+                                  })
+                                }
                                 sessionData.push({
                                   "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
                                   "Name": "Ordinal",
@@ -688,8 +699,8 @@ export class SeatAllocationComponent implements OnInit {
                                   "Name": "SessionTimeStamp",
                                   "Value": response.data[0].Properties.$values.filter(ele5 => ele5.Name == 'SessionTimeStamp')[0].Value
                                 })
-
-                                this.seatallocationService.updateSession({ sessionID: response.data[0].Properties.$values.filter(ele5 => ele5.Name == 'Ordinal')[0].Value.$value, session: sessionData }).subscribe(
+                                console.log('update session 3')
+                                this.seatallocationService.updateSession({ sessionID: response.data[0].Properties.$values.filter(ele5 => ele5.Name == 'Ordinal')[0].Value.$value, session: sessionData ,selectedPartyId: this.selectedPartyId}).subscribe(
                                   result => {
                                     this.getPrograms();
                                   }, error => {
@@ -719,6 +730,13 @@ export class SeatAllocationComponent implements OnInit {
                         increamentedValue = increamentedValue + 1;
                         if (increamentedValue == this.advancedSessions[sessionIndex].allRegistrants.length) {
                           let sessionData = new Array();
+                          if(this.envMode=='2017'){
+                            sessionData.push({
+                              "$type":"Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                              "Name":"ContactKey",
+                              "Value":this.selectedPartyId
+                            })
+                          }
                           sessionData.push({
                             "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
                             "Name": "Ordinal",
@@ -764,8 +782,8 @@ export class SeatAllocationComponent implements OnInit {
                             "Name": "SessionTimeStamp",
                             "Value": response.data[0].Properties.$values.filter(ele1 => ele1.Name == 'SessionTimeStamp')[0].Value
                           })
-
-                          this.seatallocationService.updateSession({ sessionID: response.data[0].Properties.$values.filter(ele1 => ele1.Name == 'Ordinal')[0].Value.$value, session: sessionData }).subscribe(
+                          console.log('update session 4')
+                          this.seatallocationService.updateSession({ sessionID: response.data[0].Properties.$values.filter(ele1 => ele1.Name == 'Ordinal')[0].Value.$value, session: sessionData ,selectedPartyId: this.selectedPartyId}).subscribe(
                             result => {
                               this.getPrograms();
                             }, error => {
@@ -936,6 +954,13 @@ export class SeatAllocationComponent implements OnInit {
   // update new session
   async updateSession(response, UnallocatedRegistrants) {
     let sessionData = new Array();
+    if(this.envMode=='2017'){
+      sessionData.push({
+        "$type":"Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+        "Name":"ContactKey",
+        "Value":this.selectedPartyId
+      })
+    }
     sessionData.push({
       "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
       "Name": "Ordinal",
@@ -981,8 +1006,8 @@ export class SeatAllocationComponent implements OnInit {
       "Name": "SessionTimeStamp",
       "Value": response.data[0].Properties.$values.filter(ele1 => ele1.Name == 'SessionTimeStamp')[0].Value
     })
-
-    this.seatallocationService.updateSession({ sessionID: response.data[0].Properties.$values.filter(ele1 => ele1.Name == 'Ordinal')[0].Value.$value, session: sessionData }).subscribe(
+    console.log('update session 5')
+    this.seatallocationService.updateSession({ sessionID: response.data[0].Properties.$values.filter(ele1 => ele1.Name == 'Ordinal')[0].Value.$value, session: sessionData ,selectedPartyId: this.selectedPartyId}).subscribe(
       result => {
         this.getPrograms();
       }, error => {
@@ -1113,12 +1138,22 @@ export class SeatAllocationComponent implements OnInit {
                 "$value": unallocatedTableDetails[i].Ordinal
               }
             }]
+            
           });
+          if(this.envMode== '2017'){
+              RegistrantsData[i].registrant.push(
+                {
+                  "$type":"Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                  "Name":"ContactKey",
+                  "Value":this.selectedPartyId
+                }
+              )
+          }
         }
         if (totalUnallocated == i + 1) {
           let increamentedValue = 0;
           RegistrantsData.map(ele => {
-            this.seatallocationService.updateRegistrant(ele).subscribe(
+            this.seatallocationService.updateRegistrant(ele,this.selectedPartyId).subscribe(
               result => {
                 increamentedValue = increamentedValue + 1;
                 if (increamentedValue == RegistrantsData.length) {
@@ -1136,6 +1171,13 @@ export class SeatAllocationComponent implements OnInit {
                       let allocatedRegistrantsLength = registrantsResult.filter(ele1 => ele1.TableID != 0);
 
                       let sessionData = new Array();
+                      if(this.envMode=='2017'){
+                        sessionData.push({
+                          "$type":"Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                          "Name":"ContactKey",
+                          "Value":this.selectedPartyId
+                        })
+                      }
                       sessionData.push({
                         "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
                         "Name": "Ordinal",
@@ -1181,8 +1223,8 @@ export class SeatAllocationComponent implements OnInit {
                         "Name": "SessionTimeStamp",
                         "Value": this.advancedSessions[sessionIndex].SessionTimeStamp
                       })
-
-                      this.seatallocationService.updateSession({ sessionID: this.advancedSessions[sessionIndex].Ordinal, session: sessionData }).subscribe(
+                      console.log('update session 6')
+                      this.seatallocationService.updateSession({ sessionID: this.advancedSessions[sessionIndex].Ordinal, session: sessionData,selectedPartyId: this.selectedPartyId }).subscribe(
                         result => {
                           this.toast.success("Auto Assign All has been completed. Please wait while we are updating the records!!", "Success");
                           this.getPrograms();
@@ -1266,11 +1308,20 @@ export class SeatAllocationComponent implements OnInit {
               }
             }]
           });
+          if(this.envMode== '2017'){
+            RegistrantsData[i].registrant.push(
+              {
+                "$type":"Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                "Name":"ContactKey",
+                "Value":this.selectedPartyId
+              }
+            )
+        }
         }
         if (this.advancedSessions[sessionIndex].tables.filter(ele => ele.Ordinal == this.advancedSessions[sessionIndex].tableOpened.Ordinal)[0].remainingUnallocatedRegistrantsSeats == i + 1) {
           let increamentedValue = 0;
           RegistrantsData.map(ele => {
-            this.seatallocationService.updateRegistrant(ele).subscribe(
+            this.seatallocationService.updateRegistrant(ele,this.selectedPartyId).subscribe(
               result => {
                 increamentedValue = increamentedValue + 1;
                 if (increamentedValue == RegistrantsData.length) {
@@ -1288,6 +1339,13 @@ export class SeatAllocationComponent implements OnInit {
                       let allocatedRegistrantsLength = registrantsResult.filter(ele1 => ele1.TableID != 0);
 
                       let sessionData = new Array();
+                      if(this.envMode=='2017'){
+                        sessionData.push({
+                          "$type":"Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                          "Name":"ContactKey",
+                          "Value":this.selectedPartyId
+                        })
+                      }
                       sessionData.push({
                         "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
                         "Name": "Ordinal",
@@ -1333,8 +1391,8 @@ export class SeatAllocationComponent implements OnInit {
                         "Name": "SessionTimeStamp",
                         "Value": this.advancedSessions[sessionIndex].SessionTimeStamp
                       })
-
-                      this.seatallocationService.updateSession({ sessionID: this.advancedSessions[sessionIndex].Ordinal, session: sessionData }).subscribe(
+                      console.log('update session 7')
+                      this.seatallocationService.updateSession({ sessionID: this.advancedSessions[sessionIndex].Ordinal, session: sessionData ,selectedPartyId: this.selectedPartyId}).subscribe(
                         result => {
                           this.toast.success("Auto Assign has been completed. Please wait while we are updating the records!!", "Success");
                           this.getPrograms();
@@ -1418,11 +1476,20 @@ export class SeatAllocationComponent implements OnInit {
               }
             }]
           });
+          if(this.envMode== '2017'){
+            RegistrantsData[i].registrant.push(
+              {
+                "$type":"Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                "Name":"ContactKey",
+                "Value":this.selectedPartyId
+              }
+            )
+        }
         }
         if (this.advancedSessions[sessionIndex].tables.filter(ele => ele.Ordinal == this.advancedSessions[sessionIndex].tableOpened.Ordinal)[0].remainingUnallocatedRegistrantsSeats == i + 1) {
           let increamentedValue = 0;
           RegistrantsData.map(ele => {
-            this.seatallocationService.updateRegistrant(ele).subscribe(
+            this.seatallocationService.updateRegistrant(ele,this.selectedPartyId).subscribe(
               result => {
                 increamentedValue = increamentedValue + 1;
                 if (increamentedValue == RegistrantsData.length) {
@@ -1440,6 +1507,13 @@ export class SeatAllocationComponent implements OnInit {
                       let allocatedRegistrantsLength = registrantsResult.filter(ele1 => ele1.TableID != 0);
 
                       let sessionData = new Array();
+                      if(this.envMode=='2017'){
+                        sessionData.push({
+                          "$type":"Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                          "Name":"ContactKey",
+                          "Value":this.selectedPartyId
+                        })
+                      }
                       sessionData.push({
                         "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
                         "Name": "Ordinal",
@@ -1485,8 +1559,8 @@ export class SeatAllocationComponent implements OnInit {
                         "Name": "SessionTimeStamp",
                         "Value": this.advancedSessions[sessionIndex].SessionTimeStamp
                       })
-
-                      this.seatallocationService.updateSession({ sessionID: this.advancedSessions[sessionIndex].Ordinal, session: sessionData }).subscribe(
+                      console.log('update session 8')
+                      this.seatallocationService.updateSession({ sessionID: this.advancedSessions[sessionIndex].Ordinal, session: sessionData,selectedPartyId: this.selectedPartyId }).subscribe(
                         result => {
                           this.toast.success("Manual Assign has been completed. Please wait while we are updating the records!!", "Success");
                           this.getPrograms();
@@ -1563,9 +1637,26 @@ export class SeatAllocationComponent implements OnInit {
         }
       }]
 
-      this.seatallocationService.updateRegistrant({ registrantID: innerTableInner.Ordinal, registrant: registrantData }).subscribe(
+      if(this.envMode== '2017'){
+        registrantData.push(
+          {
+            "$type":"Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+            "Name":"ContactKey",
+            "Value":this.selectedPartyId
+          }
+        )
+    }
+
+      this.seatallocationService.updateRegistrant({ registrantID: innerTableInner.Ordinal, registrant: registrantData },this.selectedPartyId).subscribe(
         result => {
           let sessionData = new Array();
+          if(this.envMode=='2017'){
+            sessionData.push({
+              "$type":"Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+              "Name":"ContactKey",
+              "Value":this.selectedPartyId
+            })
+          }
           sessionData.push({
             "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
             "Name": "Ordinal",
@@ -1612,7 +1703,7 @@ export class SeatAllocationComponent implements OnInit {
             "Value": this.advancedSessions[sessionIndex].SessionTimeStamp
           })
 
-          this.seatallocationService.updateSession({ sessionID: this.advancedSessions[sessionIndex].Ordinal, session: sessionData }).subscribe(
+          this.seatallocationService.updateSession({ sessionID: this.advancedSessions[sessionIndex].Ordinal, session: sessionData ,selectedPartyId: this.selectedPartyId}).subscribe(
             result1 => {
               this.toast.success("Registrant deleted successfully!!. Please wait while we are updating the records!!", "Success");
               this.getPrograms();
@@ -1685,10 +1776,19 @@ export class SeatAllocationComponent implements OnInit {
           }
         }]
       });
+      if(this.envMode== '2017'){
+        RegistrantsData[index].registrant.push(
+          {
+            "$type":"Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+            "Name":"ContactKey",
+            "Value":this.selectedPartyId
+          }
+        )
+    }
       if (this.advancedSessions[sessionIndex].tables[tableIndex].tablesAllocatedRegistrants.length == index + 1) {
         let increamentedValue = 0;
         RegistrantsData.map(ele1 => {
-          this.seatallocationService.updateRegistrant(ele1).subscribe(
+          this.seatallocationService.updateRegistrant(ele1,this.selectedPartyId).subscribe(
             result => {
               increamentedValue = increamentedValue + 1;
               if (increamentedValue == RegistrantsData.length) {
@@ -1712,9 +1812,10 @@ export class SeatAllocationComponent implements OnInit {
   styleUrls: ['./seat-allocation.component.scss']
 })
 export class SessionDialogComponent {
+  envMode='2017'
   faExclamationTriangle = faExclamationTriangle;
   faCaretRight = faCaretRight;
-
+  selectedPartyId= JSON.parse(document.getElementById('__ClientContext')['value']).selectedPartyId
   dropdownSettings = {
     singleSelection: false,
     idField: 'EventFunctionId',
@@ -1736,6 +1837,7 @@ export class SessionDialogComponent {
     private toast: ToastrService,
     private seatallocationService: SeatallocationService) {
     this.sessionPrograms = [];
+    console.log(this.selectedPartyId)
 
     if (this.data.session) {
       this.SessionName = this.data.session.SessionName;
@@ -1767,10 +1869,18 @@ export class SessionDialogComponent {
     })
     let sessionData = new Array();
     if (this.data.session) {
+
       sessionData.push({
         "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
         "Name": "Ordinal",
         "Value": { "$type": "System.Int32", "$value": this.data.session.Ordinal }
+      })
+    }
+    if(this.envMode=='2017'){
+      sessionData.push({
+        "$type":"Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+        "Name":"ContactKey",
+        "Value":this.selectedPartyId
       })
     }
     sessionData.push({
@@ -1816,7 +1926,7 @@ export class SessionDialogComponent {
     let currentTimeStamp = this.data.session ? this.data.session.SessionTimeStamp : Math.floor(Date.now() / 1000);
 
     if (this.data.session) {
-      this.seatallocationService.updateSession({ sessionID: this.data.session.Ordinal, session: sessionData }).subscribe(
+      this.seatallocationService.updateSession({ sessionID: this.data.session.Ordinal, session: sessionData ,selectedPartyId: this.selectedPartyId}).subscribe(
         result => {
           if (result) {
             this.seatallocationService.getSessionByTimeStamp(currentTimeStamp).subscribe(
@@ -1866,15 +1976,15 @@ export class SessionDialogComponent {
 
   // delete the table
   onDelete() {
-    this.matSnackBar.open(`Delete ${this.data.session.SessionName}?`, 'DELETE', { duration: 5000 })
+    this.matSnackBar.open(`Delete ${this.data.session.SessionName}?`, 'DELETE', { duration: 50000 })
       .onAction().subscribe(() => {
         this.isLoading = true;
-        this.seatallocationService.deleteSession(this.data.session.Ordinal).subscribe(
+        this.seatallocationService.deleteSession(this.data.session.Ordinal,this.selectedPartyId).subscribe(
           result => {
             let increamentedValue = 0;
             if (this.data.session.tables.length > 0) {
               this.data.session.tables.map(ele => {
-                this.seatallocationService.deleteTable(ele.Ordinal).subscribe(
+                this.seatallocationService.deleteTable(ele.Ordinal,this.selectedPartyId).subscribe(
                   result1 => {
                     increamentedValue = increamentedValue + 1;
                     if (increamentedValue == this.data.session.tables.length) {
@@ -1913,6 +2023,8 @@ export class SessionTableDialogComponent {
   // declare variables 
   tableForm: FormGroup;
   isLoading: boolean = false;
+  envMode='2017'
+  selectedPartyId= JSON.parse(document.getElementById('__ClientContext')['value']).selectedPartyId
 
   constructor(
     public dialogRef: MatDialogRef<SessionTableDialogComponent>,
@@ -1962,6 +2074,13 @@ export class SessionTableDialogComponent {
         "Value": { "$type": "System.Int32", "$value": this.data.sessionTable.Ordinal }
       })
     }
+    if(this.envMode=='2017'){
+      tableData.push({
+        "$type":"Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+        "Name":"ContactKey",
+        "Value":this.selectedPartyId
+      })
+    }
     tableData.push({
       "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
       "Name": "Colour",
@@ -1989,11 +2108,19 @@ export class SessionTableDialogComponent {
     })
 
     let sessionData = new Array();
+    if(this.envMode=='2017'){
+      sessionData.push({
+        "$type":"Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+        "Name":"ContactKey",
+        "Value":this.selectedPartyId
+      })
+    }
     sessionData.push({
       "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
       "Name": "Ordinal",
       "Value": { "$type": "System.Int32", "$value": this.data.session.Ordinal }
     })
+
     sessionData.push({
       "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
       "Name": "TotalUnallocated",
@@ -2039,7 +2166,7 @@ export class SessionTableDialogComponent {
       "Value": this.data.session.SessionTimeStamp
     })
     if (this.data.sessionTable) {
-      this.seatallocationService.updateTable({ tableID: this.data.sessionTable.Ordinal, table: tableData }).subscribe(
+      this.seatallocationService.updateTable({ tableID: this.data.sessionTable.Ordinal, table: tableData ,selectedPartyId: this.selectedPartyId}).subscribe(
         result => {
           if (result) this.updateSession(sessionData);
           else this.toast.error("Something went wrong!! Please try again later!!", "Error");
@@ -2061,12 +2188,18 @@ export class SessionTableDialogComponent {
 
   // delete the table
   onDelete() {
-    this.matSnackBar.open(`Delete ${this.data.sessionTable.TableName}?`, 'DELETE', { duration: 5000 })
+    console.log('delete 0')
+    this.matSnackBar.open(`Delete ${this.data.sessionTable.TableName}?`, 'DELETE', { duration: 100000 })
       .onAction().subscribe(() => {
         this.isLoading = true;
-        this.seatallocationService.deleteTable(this.data.sessionTable.Ordinal).subscribe(
+        console.log('delete 1')
+        this.seatallocationService.deleteTable(this.data.sessionTable.Ordinal,this.selectedPartyId).subscribe(
           result => {
-            if (this.data.sessionTable.tablesAllocatedRegistrants.length > 0) {
+
+            console.log(this.data.sessionTable)
+           
+
+            if ( this.data.sessionTable && this.data.sessionTable.tablesAllocatedRegistrants && this.data.sessionTable.tablesAllocatedRegistrants.length && this.data.sessionTable.tablesAllocatedRegistrants.length > 0) {
               let increamentedValue = 0;
               this.data.sessionTable.tablesAllocatedRegistrants.map(ele => {
                 let registrantData = [{
@@ -2116,11 +2249,27 @@ export class SessionTableDialogComponent {
                     "$value": 0
                   }
                 }]
-                this.seatallocationService.updateRegistrant({ registrantID: ele.Ordinal, registrant: registrantData }).subscribe(
+                if(this.envMode== '2017'){
+                  registrantData.push(
+                    {
+                      "$type":"Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                      "Name":"ContactKey",
+                      "Value":this.selectedPartyId
+                    }
+                  )
+              }
+                this.seatallocationService.updateRegistrant({ registrantID: ele.Ordinal, registrant: registrantData },this.selectedPartyId).subscribe(
                   result1 => {
                     increamentedValue = increamentedValue + 1;
                     if (increamentedValue == this.data.sessionTable.tablesAllocatedRegistrants.length) {
                       let sessionData = new Array();
+                      if(this.envMode=='2017'){
+                        sessionData.push({
+                          "$type":"Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                          "Name":"ContactKey",
+                          "Value":this.selectedPartyId
+                        })
+                      }
                       sessionData.push({
                         "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
                         "Name": "Ordinal",
@@ -2177,6 +2326,13 @@ export class SessionTableDialogComponent {
               })
             } else {
               let sessionData = new Array();
+              if(this.envMode=='2017'){
+                sessionData.push({
+                  "$type":"Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                  "Name":"ContactKey",
+                  "Value":this.selectedPartyId
+                })
+              }
               sessionData.push({
                 "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
                 "Name": "Ordinal",
@@ -2235,7 +2391,7 @@ export class SessionTableDialogComponent {
 
   // update Session
   updateSession(sessionData, isDeleted = null) {
-    this.seatallocationService.updateSession({ sessionID: this.data.session.Ordinal, session: sessionData }).subscribe(
+    this.seatallocationService.updateSession({ sessionID: this.data.session.Ordinal, session: sessionData ,selectedPartyId: this.selectedPartyId}).subscribe(
       result => {
         if (result) {
           if (isDeleted) {

@@ -18,6 +18,7 @@
                 <mat-error *ngIf="NumSeats.hasError('pattern')">No. of Seats should be in numbers</mat-error>
                 <mat-error *ngIf="NumSeats.hasError('min')">No. of Seats should be greater than 0</mat-error>
             </mat-form-field>
+            
 
             <mat-form-field class="fld d-block">
                 <input matInput [style.background]="tableForm.value.Colour" [colorPicker]="tableForm.value.Colour"

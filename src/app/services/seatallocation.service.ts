@@ -12,6 +12,8 @@ export class SeatallocationService {
   live: boolean = true;
   baseUrl: string;
   token: string;
+  envMode: string='2017'
+  httpOptions:any;
 
   constructor(private httpClient: HttpClient) {
     this.getContext();
@@ -22,6 +24,12 @@ export class SeatallocationService {
     var clientContext = JSON.parse(clientContextStr);
     this.token = (document.querySelector('#__RequestVerificationToken') as HTMLInputElement).value;
     this.baseUrl = 'http://localhost:4200/';
+    this.httpOptions = {
+      headers: new HttpHeaders({
+        'Content-Type': 'application/json',
+        'RequestVerificationToken': this.token
+      })
+    }
   }
 
   // get programs for session starts
@@ -34,16 +42,20 @@ export class SeatallocationService {
     const httpOptions = {
       headers: new HttpHeaders({
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${this.token}`
+        'RequestVerificationToken': this.token
       })
-
-      
     }
-    // const headers = new Headers({
-    //   'Content-Type': 'application/json',
-    //   'Authorization': `Bearer ${this.token}`
-    // })
-    let url = this.baseUrl + 'api/Event?EventId=' + eventID;
+
+    // httpOptions = {
+    //   headers: new HttpHeaders({
+    //     'Content-Type': 'application/json',
+    //     'RequestVerificationToken': this.token
+    //   })
+    // }
+
+    
+    
+    let url =  `api/Event?EventId=` + eventID;
     return this.httpClient.get(url, httpOptions)
       .pipe(map((res: any) => {
         return res.Items.$values;
@@ -68,10 +80,10 @@ export class SeatallocationService {
     const httpOptions = {
       headers: new HttpHeaders({
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${this.token}`
+        'RequestVerificationToken': this.token
       })
     }
-    let url = this.baseUrl + 'api/Psc_Event_Session?EventID=' + eventID;
+    let url =  `api/${this.envMode=='2017'?'Psc_Event_Session_2017' :'Psc_Event_Session'}?EventID=` + eventID;
     return this.httpClient.get(url, httpOptions)
       .pipe(map((res: any) => {
         return res.Items.$values
@@ -96,35 +108,51 @@ export class SeatallocationService {
     const httpOptions = {
       headers: new HttpHeaders({
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${this.token}`
+        'RequestVerificationToken': this.token
       })
     }
-    let postSessionData = {
-      "$type": "Asi.Soa.Core.DataContracts.GenericEntityData, Asi.Contracts",
-      "EntityTypeName": "Psc_Event_Session",
-      "PrimaryParentEntityTypeName": "Standalone",
-      "Identity": {
-        "$type": "Asi.Soa.Core.DataContracts.IdentityData, Asi.Contracts",
-        "EntityTypeName": "Psc_Event_Session",
-        "IdentityElements": {
-          "$type": "System.Collections.ObjectModel.Collection`1[[System.String, mscorlib]], mscorlib",
-          "$values": [""]
+    let postSessionData = {}
+
+    if(this.envMode=='2017'){
+      postSessionData={
+        "$type": "Asi.Soa.Core.DataContracts.GenericEntityData, Asi.Contracts",
+         "EntityTypeName": "Psc_Event_Session_2017",
+         "Properties": {
+          "$type": "Asi.Soa.Core.DataContracts.GenericPropertyDataCollection, Asi.Contracts",
+          "$values": data.session
         }
-      },
-      "PrimaryParentIdentity": {
-        "$type": "Asi.Soa.Core.DataContracts.IdentityData, Asi.Contracts",
-        "EntityTypeName": "Standalone",
-        "IdentityElements": {
-          "$type": "System.Collections.ObjectModel.Collection`1[[System.String, mscorlib]], mscorlib",
-          "$values": [""]
-        }
-      },
-      "Properties": {
-        "$type": "Asi.Soa.Core.DataContracts.GenericPropertyDataCollection, Asi.Contracts",
-        "$values": data.session
       }
+
+    }else{
+      postSessionData={
+         "$type": "Asi.Soa.Core.DataContracts.GenericEntityData, Asi.Contracts",
+          "EntityTypeName": "Psc_Event_Session",
+          "PrimaryParentEntityTypeName": "Standalone",
+          "Identity": {
+            "$type": "Asi.Soa.Core.DataContracts.IdentityData, Asi.Contracts",
+            "EntityTypeName": "Psc_Event_Session",
+            "IdentityElements": {
+              "$type": "System.Collections.ObjectModel.Collection`1[[System.String, mscorlib]], mscorlib",
+              "$values": [""]
+            }
+          },
+          "PrimaryParentIdentity": {
+            "$type": "Asi.Soa.Core.DataContracts.IdentityData, Asi.Contracts",
+            "EntityTypeName": "Standalone",
+            "IdentityElements": {
+              "$type": "System.Collections.ObjectModel.Collection`1[[System.String, mscorlib]], mscorlib",
+              "$values": [""]
+            }
+          },
+          "Properties": {
+            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyDataCollection, Asi.Contracts",
+            "$values": data.session
+          }
+        }
     }
-    let url = this.baseUrl + 'api/Psc_Event_Session';
+      
+    let url =  `api/${this.envMode=='2017'?'Psc_Event_Session_2017' :'Psc_Event_Session7'}`;
+    console.log(postSessionData)
     return this.httpClient.post(url, postSessionData, httpOptions).pipe(map((res: Sessions) => { return res; }));
   }
 
@@ -230,36 +258,53 @@ export class SeatallocationService {
     const httpOptions = {
       headers: new HttpHeaders({
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${this.token}`
+        'RequestVerificationToken': this.token
       })
     }
-    let postSessionData = {
-      "$type": "Asi.Soa.Core.DataContracts.GenericEntityData, Asi.Contracts",
-      "EntityTypeName": "Psc_Event_Session",
-      "PrimaryParentEntityTypeName": "Standalone",
-      "Identity": {
-        "$type": "Asi.Soa.Core.DataContracts.IdentityData, Asi.Contracts",
+    let postSessionData = {}
+
+    if(this.envMode=='2017' ){
+      postSessionData = {
+        "$type": "Asi.Soa.Core.DataContracts.GenericEntityData, Asi.Contracts",
+        "EntityTypeName": "Psc_Event_Session_2017",
+        "Properties": {
+          "$type": "Asi.Soa.Core.DataContracts.GenericPropertyDataCollection, Asi.Contracts",
+          "$values": data.session
+        }
+      }
+
+    }else{
+      postSessionData = {
+        "$type": "Asi.Soa.Core.DataContracts.GenericEntityData, Asi.Contracts",
         "EntityTypeName": "Psc_Event_Session",
-        "IdentityElements": {
-          "$type": "System.Collections.ObjectModel.Collection`1[[System.String, mscorlib]], mscorlib",
-          "$values": [data.sessionID]
+        "PrimaryParentEntityTypeName": "Standalone",
+        "Identity": {
+          "$type": "Asi.Soa.Core.DataContracts.IdentityData, Asi.Contracts",
+          "EntityTypeName": "Psc_Event_Session",
+          "IdentityElements": {
+            "$type": "System.Collections.ObjectModel.Collection`1[[System.String, mscorlib]], mscorlib",
+            "$values": [data.sessionID]
+          }
+        },
+        "PrimaryParentIdentity": {
+          "$type": "Asi.Soa.Core.DataContracts.IdentityData, Asi.Contracts",
+          "EntityTypeName": "Standalone",
+          "IdentityElements": {
+            "$type": "System.Collections.ObjectModel.Collection`1[[System.String, mscorlib]], mscorlib",
+            "$values": [data.sessionID]
+          }
+        },
+        "Properties": {
+          "$type": "Asi.Soa.Core.DataContracts.GenericPropertyDataCollection, Asi.Contracts",
+          "$values": data.session
         }
-      },
-      "PrimaryParentIdentity": {
-        "$type": "Asi.Soa.Core.DataContracts.IdentityData, Asi.Contracts",
-        "EntityTypeName": "Standalone",
-        "IdentityElements": {
-          "$type": "System.Collections.ObjectModel.Collection`1[[System.String, mscorlib]], mscorlib",
-          "$values": [data.sessionID]
-        }
-      },
-      "Properties": {
-        "$type": "Asi.Soa.Core.DataContracts.GenericPropertyDataCollection, Asi.Contracts",
-        "$values": data.session
       }
     }
-    let url = this.baseUrl + 'api/Psc_Event_Session/' + data.sessionID;
-    return this.httpClient.put(url, postSessionData, httpOptions).pipe(map((res: Sessions) => { return res; }));
+console.log(postSessionData)
+    let url =  'api/Psc_Event_Session/' + data.sessionID;
+    let url2017 =  'api/Psc_Event_Session_2017/~'+data.selectedPartyId+'|' + data.sessionID;
+    console.log(url2017)
+    return this.httpClient.put(this.envMode == '2017'? url2017:url, postSessionData, httpOptions).pipe(map((res: Sessions) => { return res; }));
   }
 
   private updateFakedSession(data): Observable<Sessions> {
@@ -355,20 +400,21 @@ export class SeatallocationService {
 
 
   // delete session starts
-  public deleteSession(sessionID): Observable<any> {
-    if (this.live) return this.deleteLiveSession(sessionID);
+  public deleteSession(sessionID,selectedPartyId): Observable<any> {
+    if (this.live) return this.deleteLiveSession(sessionID,selectedPartyId);
     else return this.deleteFakedSession(sessionID);
   }
 
-  private deleteLiveSession(sessionID): Observable<any> {
+  private deleteLiveSession(sessionID,selectedPartyId): Observable<any> {
     const httpOptions = {
       headers: new HttpHeaders({
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${this.token}`
+        'RequestVerificationToken': this.token
       })
     }
-    let url = this.baseUrl + 'api/Psc_Event_Session/' + sessionID;
-    return this.httpClient.delete(url, httpOptions).pipe(map((res: any) => { return res; }));
+    let url =  'api/Psc_Event_Session/' + sessionID;
+    let url2017=  `api/Psc_Event_Session_2017/~`+selectedPartyId+'|' + sessionID;
+    return this.httpClient.delete(this.envMode == '2017'? url2017: url, httpOptions).pipe(map((res: any) => { return res; }));
   }
 
   private deleteFakedSession(sessionID): Observable<any> {
@@ -388,10 +434,10 @@ export class SeatallocationService {
     const httpOptions = {
       headers: new HttpHeaders({
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${this.token}`
+        'RequestVerificationToken': this.token
       })
     }
-    let url = this.baseUrl + 'api/Psc_Event_Table?EventID=' + eventID;
+    let url =  `api/${this.envMode=='2017'?'Psc_Event_Table_2017' :'Psc_Event_Table'}?EventID=` + eventID;
     return this.httpClient.get(url, httpOptions)
       .pipe(map((res: any) => {
         return res.Items.$values
@@ -624,35 +670,50 @@ export class SeatallocationService {
     const httpOptions = {
       headers: new HttpHeaders({
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${this.token}`
+        'RequestVerificationToken': this.token
       })
     }
-    let postTableData = {
-      "$type": "Asi.Soa.Core.DataContracts.GenericEntityData, Asi.Contracts",
-      "EntityTypeName": "Psc_Event_Table",
-      "PrimaryParentEntityTypeName": "Standalone",
-      "Identity": {
-        "$type": "Asi.Soa.Core.DataContracts.IdentityData, Asi.Contracts",
+    let postTableData = {}
+
+    if(this.envMode=='2017'){
+      postTableData = {
+        "$type": "Asi.Soa.Core.DataContracts.GenericEntityData, Asi.Contracts",
+        "EntityTypeName": "Psc_Event_Table_2017",
+        "Properties": {
+          "$type": "Asi.Soa.Core.DataContracts.GenericPropertyDataCollection, Asi.Contracts",
+          "$values": data.table
+        }
+      }
+
+    }else{
+      postTableData = {
+        "$type": "Asi.Soa.Core.DataContracts.GenericEntityData, Asi.Contracts",
         "EntityTypeName": "Psc_Event_Table",
-        "IdentityElements": {
-          "$type": "System.Collections.ObjectModel.Collection`1[[System.String, mscorlib]], mscorlib",
-          "$values": [""]
+        "PrimaryParentEntityTypeName": "Standalone",
+        "Identity": {
+          "$type": "Asi.Soa.Core.DataContracts.IdentityData, Asi.Contracts",
+          "EntityTypeName": "Psc_Event_Table",
+          "IdentityElements": {
+            "$type": "System.Collections.ObjectModel.Collection`1[[System.String, mscorlib]], mscorlib",
+            "$values": [""]
+          }
+        },
+        "PrimaryParentIdentity": {
+          "$type": "Asi.Soa.Core.DataContracts.IdentityData, Asi.Contracts",
+          "EntityTypeName": "Standalone",
+          "IdentityElements": {
+            "$type": "System.Collections.ObjectModel.Collection`1[[System.String, mscorlib]], mscorlib",
+            "$values": [""]
+          }
+        },
+        "Properties": {
+          "$type": "Asi.Soa.Core.DataContracts.GenericPropertyDataCollection, Asi.Contracts",
+          "$values": data.table
         }
-      },
-      "PrimaryParentIdentity": {
-        "$type": "Asi.Soa.Core.DataContracts.IdentityData, Asi.Contracts",
-        "EntityTypeName": "Standalone",
-        "IdentityElements": {
-          "$type": "System.Collections.ObjectModel.Collection`1[[System.String, mscorlib]], mscorlib",
-          "$values": [""]
-        }
-      },
-      "Properties": {
-        "$type": "Asi.Soa.Core.DataContracts.GenericPropertyDataCollection, Asi.Contracts",
-        "$values": data.table
       }
     }
-    let url = this.baseUrl + 'api/Psc_Event_Table';
+    console.log('added table ',postTableData)
+    let url =  `api/${this.envMode=='2017'?'Psc_Event_Table_2017' :'Psc_Event_Table'}`;
     return this.httpClient.post(url, postTableData, httpOptions).pipe(map((res: Sessions) => { return res; }));
   }
 
@@ -742,36 +803,56 @@ export class SeatallocationService {
     const httpOptions = {
       headers: new HttpHeaders({
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${this.token}`
+        'RequestVerificationToken': this.token
       })
     }
     let postSessionData = {
-      "$type": "Asi.Soa.Core.DataContracts.GenericEntityData, Asi.Contracts",
-      "EntityTypeName": "Psc_Event_Table",
-      "PrimaryParentEntityTypeName": "Standalone",
-      "Identity": {
-        "$type": "Asi.Soa.Core.DataContracts.IdentityData, Asi.Contracts",
+      
+    }
+
+    if(this.envMode=='2017'){
+      postSessionData = {
+        "$type": "Asi.Soa.Core.DataContracts.GenericEntityData, Asi.Contracts",
+        "EntityTypeName": "Psc_Event_Table_2017",
+        "Properties": {
+          "$type": "Asi.Soa.Core.DataContracts.GenericPropertyDataCollection, Asi.Contracts",
+          "$values": data.table
+        }
+      }
+
+    }else{
+      postSessionData = {
+        "$type": "Asi.Soa.Core.DataContracts.GenericEntityData, Asi.Contracts",
         "EntityTypeName": "Psc_Event_Table",
-        "IdentityElements": {
-          "$type": "System.Collections.ObjectModel.Collection`1[[System.String, mscorlib]], mscorlib",
-          "$values": [data.tableID]
+        "PrimaryParentEntityTypeName": "Standalone",
+        "Identity": {
+          "$type": "Asi.Soa.Core.DataContracts.IdentityData, Asi.Contracts",
+          "EntityTypeName": "Psc_Event_Table",
+          "IdentityElements": {
+            "$type": "System.Collections.ObjectModel.Collection`1[[System.String, mscorlib]], mscorlib",
+            "$values": [data.tableID]
+          }
+        },
+        "PrimaryParentIdentity": {
+          "$type": "Asi.Soa.Core.DataContracts.IdentityData, Asi.Contracts",
+          "EntityTypeName": "Standalone",
+          "IdentityElements": {
+            "$type": "System.Collections.ObjectModel.Collection`1[[System.String, mscorlib]], mscorlib",
+            "$values": [data.tableID]
+          }
+        },
+        "Properties": {
+          "$type": "Asi.Soa.Core.DataContracts.GenericPropertyDataCollection, Asi.Contracts",
+          "$values": data.table
         }
-      },
-      "PrimaryParentIdentity": {
-        "$type": "Asi.Soa.Core.DataContracts.IdentityData, Asi.Contracts",
-        "EntityTypeName": "Standalone",
-        "IdentityElements": {
-          "$type": "System.Collections.ObjectModel.Collection`1[[System.String, mscorlib]], mscorlib",
-          "$values": [data.tableID]
-        }
-      },
-      "Properties": {
-        "$type": "Asi.Soa.Core.DataContracts.GenericPropertyDataCollection, Asi.Contracts",
-        "$values": data.table
       }
     }
-    let url = this.baseUrl + 'api/Psc_Event_Table/' + data.tableID;
-    return this.httpClient.put(url, postSessionData, httpOptions).pipe(map((res: Sessions) => { return res; }));
+    let url =  `api/Psc_Event_Table/` + data.tableID;
+
+    
+    let url2017=  `api/Psc_Event_Table_2017/~`+data.selectedPartyId+'|' + data.tableID;
+
+    return this.httpClient.put(this.envMode == '2017'? url2017:url, postSessionData, httpOptions).pipe(map((res: Sessions) => { return res; }));
   }
 
   private updateFakedTable(data): Observable<Sessions> {
@@ -847,20 +928,22 @@ export class SeatallocationService {
 
 
   // delete table starts
-  public deleteTable(tableID): Observable<any> {
-    if (this.live) return this.deleteLiveTable(tableID);
+  public deleteTable(tableID,selectedPartyId): Observable<any> {
+    if (this.live) return this.deleteLiveTable(tableID,selectedPartyId);
     else return this.deleteFakedTable(tableID);
   }
 
-  private deleteLiveTable(tableID): Observable<any> {
+  private deleteLiveTable(tableID,selectedPartyId): Observable<any> {
     const httpOptions = {
       headers: new HttpHeaders({
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${this.token}`
+        'RequestVerificationToken': this.token
       })
     }
-    let url = this.baseUrl + 'api/Psc_Event_Table/' + tableID;
-    return this.httpClient.delete(url, httpOptions).pipe(map((res: any) => { return res; }));
+    console.log('delete 2')
+    let url =  `api/Psc_Event_Table/` + tableID;
+    let url2017=  `api/Psc_Event_Table_2017/~`+selectedPartyId+'|' + tableID;
+    return this.httpClient.delete(this.envMode == '2017'? url2017: url, httpOptions).pipe(map((res: any) => { return res; }));
   }
 
   private deleteFakedTable(tableID): Observable<any> {
@@ -880,10 +963,10 @@ export class SeatallocationService {
     const httpOptions = {
       headers: new HttpHeaders({
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${this.token}`
+        'RequestVerificationToken': this.token
       })
     }
-    let url = this.baseUrl + 'api/Psc_Event_Session?SessionTimeStamp=' + TimeStamp;
+    let url =  `api/${this.envMode=='2017'?'Psc_Event_Session_2017' :'Psc_Event_Session'}?SessionTimeStamp=` + TimeStamp;
     return this.httpClient.get(url, httpOptions)
       .pipe(map((res: any) => {
         return res.Items.$values
@@ -999,10 +1082,10 @@ export class SeatallocationService {
     const httpOptions = {
       headers: new HttpHeaders({
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${this.token}`
+        'RequestVerificationToken': this.token
       })
     }
-    let url = this.baseUrl + 'api/iqa?QueryName=$/PseudoCode/SeatPlanner/Pseudocode - Registrants by Program&parameter=' + programs + "&Limit=500";
+    let url =  'api/iqa?QueryName=$/PseudoCode/SeatPlanner/Pseudocode - Registrants by Program&parameter=' + programs + "&Limit=500";
     console.log(url);
     return this.httpClient.get(url, httpOptions)
       .pipe(map((res: any) => {
@@ -1028,10 +1111,11 @@ export class SeatallocationService {
     const httpOptions = {
       headers: new HttpHeaders({
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${this.token}`
+        'RequestVerificationToken': this.token
       })
     }
-    let url = this.baseUrl + 'api/Psc_Event_Registrant';
+    let url =  `api/${this.envMode=='2017'?'Psc_Event_Registrant_2017' :'Psc_Event_Registrant'}`;
+    console.log('add new data',data)
     return this.httpClient.post(url, data, httpOptions).pipe(map((res: Sessions) => { return res; }));
   }
 
@@ -1052,14 +1136,14 @@ export class SeatallocationService {
     const httpOptions = {
       headers: new HttpHeaders({
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${this.token}`
+        'RequestVerificationToken': this.token
       })
     }
     let url;
     if (sessionID)
-      url = this.baseUrl + 'api/Psc_Event_Registrant?EventID=' + eventID + '&SessionID=' + sessionID + '&Limit=500';
+      url =  `api/${this.envMode=='2017'?'Psc_Event_Registrant_2017' :'Psc_Event_Registrant'}?EventID=` + eventID + '&SessionID=' + sessionID + '&Limit=500';
     else
-      url = this.baseUrl + 'api/Psc_Event_Registrant?EventID=' + eventID + '&Limit=500';
+      url =  `api/${this.envMode=='2017'?'Psc_Event_Registrant_2017' :'Psc_Event_Registrant'}?EventID=` + eventID + '&Limit=500';
     return this.httpClient.get(url, httpOptions)
       .pipe(map((res: any) => {
         return res.Items.$values
@@ -1076,45 +1160,63 @@ export class SeatallocationService {
 
 
   // update registrant starts
-  public updateRegistrant(data): Observable<Sessions> {
-    if (this.live) return this.updateLiveRegistrant(data);
+  public updateRegistrant(data,selectedPartyId): Observable<Sessions> {
+    if (this.live) return this.updateLiveRegistrant(data,selectedPartyId);
     else return this.updateFakedRegistrant(data);
   }
 
-  private updateLiveRegistrant(data): Observable<Sessions> {
+  private updateLiveRegistrant(data,selectedPartyId): Observable<Sessions> {
     const httpOptions = {
       headers: new HttpHeaders({
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${this.token}`
+        'RequestVerificationToken': this.token
       })
     }
-    let postRegistrantData = {
-      "$type": "Asi.Soa.Core.DataContracts.GenericEntityData, Asi.Contracts",
-      "EntityTypeName": "Psc_Event_Registrant",
-      "PrimaryParentEntityTypeName": "Standalone",
-      "Identity": {
-        "$type": "Asi.Soa.Core.DataContracts.IdentityData, Asi.Contracts",
+
+    let postRegistrantData = {}
+    if(this.envMode=='2017'){
+      postRegistrantData = {
+        "$type": "Asi.Soa.Core.DataContracts.GenericEntityData, Asi.Contracts",
+        "EntityTypeName": "Psc_Event_Registrant_2017",
+        
+        "Properties": {
+          "$type": "Asi.Soa.Core.DataContracts.GenericPropertyDataCollection, Asi.Contracts",
+          "$values": data.registrant
+        }
+      }
+
+    }else{
+      postRegistrantData = {
+        "$type": "Asi.Soa.Core.DataContracts.GenericEntityData, Asi.Contracts",
         "EntityTypeName": "Psc_Event_Registrant",
-        "IdentityElements": {
-          "$type": "System.Collections.ObjectModel.Collection`1[[System.String, mscorlib]], mscorlib",
-          "$values": [data.registrantID]
+        "PrimaryParentEntityTypeName": "Standalone",
+        "Identity": {
+          "$type": "Asi.Soa.Core.DataContracts.IdentityData, Asi.Contracts",
+          "EntityTypeName": "Psc_Event_Registrant",
+          "IdentityElements": {
+            "$type": "System.Collections.ObjectModel.Collection`1[[System.String, mscorlib]], mscorlib",
+            "$values": [data.registrantID]
+          }
+        },
+        "PrimaryParentIdentity": {
+          "$type": "Asi.Soa.Core.DataContracts.IdentityData, Asi.Contracts",
+          "EntityTypeName": "Standalone",
+          "IdentityElements": {
+            "$type": "System.Collections.ObjectModel.Collection`1[[System.String, mscorlib]], mscorlib",
+            "$values": [data.registrantID]
+          }
+        },
+        "Properties": {
+          "$type": "Asi.Soa.Core.DataContracts.GenericPropertyDataCollection, Asi.Contracts",
+          "$values": data.registrant
         }
-      },
-      "PrimaryParentIdentity": {
-        "$type": "Asi.Soa.Core.DataContracts.IdentityData, Asi.Contracts",
-        "EntityTypeName": "Standalone",
-        "IdentityElements": {
-          "$type": "System.Collections.ObjectModel.Collection`1[[System.String, mscorlib]], mscorlib",
-          "$values": [data.registrantID]
-        }
-      },
-      "Properties": {
-        "$type": "Asi.Soa.Core.DataContracts.GenericPropertyDataCollection, Asi.Contracts",
-        "$values": data.registrant
       }
     }
-    let url = this.baseUrl + 'api/Psc_Event_Registrant/' + data.registrantID;
-    return this.httpClient.put(url, postRegistrantData, httpOptions).pipe(map((res: Sessions) => { return res; }));
+    let url =  `api/Psc_Event_Registrant/` + data.registrantID;
+    
+    let url2017=  `api/Psc_Event_Table_2017/~`+selectedPartyId+'|' +  data.registrantID;
+    console.log('update registant',postRegistrantData)
+    return this.httpClient.put(this.envMode=='2017'? url2017: url, postRegistrantData, httpOptions).pipe(map((res: Sessions) => { return res; }));
   }
 
   private updateFakedRegistrant(data): Observable<Sessions> {
@@ -1134,10 +1236,10 @@ export class SeatallocationService {
     const httpOptions = {
       headers: new HttpHeaders({
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${this.token}`
+        'RequestVerificationToken': this.token
       })
     }
-    let url = this.baseUrl + 'api/Psc_Event_Registrant/' + registrantID;
+    let url =  `api/${this.envMode=='2017'?'Psc_Event_Registrant_2017' :'Psc_Event_Registrant'}/` + registrantID;
     return this.httpClient.delete(url, httpOptions).pipe(map((res: any) => { return res; }));
   }
 

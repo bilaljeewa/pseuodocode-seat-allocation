@@ -7,10 +7,11 @@
       <input matInput [(ngModel)]="SessionName" [ngModelOptions]="{standalone: true}">
     </mat-form-field>
     <mat-error *ngIf="!SessionName && errorMessage">Please enter Session Name</mat-error>
-    <div class="multi-select-drop">
-      <label class="mt-lg-2 mb-0 mt-md-0" for="">Session Programs</label>
-      <ng-multiselect-dropdown color="accent" class="w-100" [data]="data.programs" [(ngModel)]="sessionPrograms"
-        [settings]="dropdownSettings">
+    <div class="multi-select-drop" >
+      <label class="mt-lg-2 mb-0 mt-md-0" for="">Session Programs </label>
+      <ng-multiselect-dropdown [settings]="dropdownSettings" color="accent" class="w-100" [data]="data.programs" [(ngModel)]="sessionPrograms"
+          >
+        >
       </ng-multiselect-dropdown>
       <mat-error *ngIf="sessionPrograms.length == 0 && errorMessage">Please select Session Programs</mat-error>
     </div>
