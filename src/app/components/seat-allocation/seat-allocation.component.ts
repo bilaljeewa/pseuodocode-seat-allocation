@@ -6,6 +6,8 @@ import { SeatallocationService } from 'src/app/services/seatallocation.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ToastrService } from 'ngx-toastr';
 import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
+import { from } from 'rxjs';
+import { concatMap,finalize } from 'rxjs/operators';
 
 @Component({
   selector: 'app-seat-allocation',
@@ -16,6 +18,7 @@ export class SeatAllocationComponent implements OnInit {
 
   envMode='2017'
   selectedPartyId= JSON.parse(document.getElementById('__ClientContext')['value']).selectedPartyId
+  progressPercentage: number = 0;
 
   identifyer = (index:number, item: any) => item.name;
   movies = [
@@ -340,26 +343,53 @@ export class SeatAllocationComponent implements OnInit {
                   
                   if (result.length == index + 1) {
                     let increamentedValue = 0;
-                    RegistrantsDetails.map((RegistrantElement, RegistrantIndex) => {
-                      console.log('resistant 1')
-                      this.seatallocationService.addRegistrant(RegistrantElement).subscribe(
-                        RegistrantResult => {
-                          increamentedValue = increamentedValue + 1;
-                          if (increamentedValue == RegistrantsDetails.length) {
-                            this.seatallocationService.getRegistrants(response.data[0].Properties.$values.filter(ele1 => ele1.Name == 'EventID')[0].Value, response.data[0].Properties.$values.filter(ele1 => ele1.Name == 'Ordinal')[0].Value.$value).subscribe(
-                              (RegistrantsResult: any) => {
-                                console.log('update session 1')
-                                this.updateSession(response, RegistrantsResult.length);
-                              }, RegistrantsError => {
-                                this.toast.error("Something went wrong!! Please try again later!!", "Error");
-                              }
-                            )
-                          }
-                        }, RegistrantError => {
-                          this.toast.error("Something went wrong!! Please try again later!!", "Error");
+                    const totalRequests = RegistrantsDetails.length;
+                    from(RegistrantsDetails).pipe(
+                      concatMap(RegistrantElement => this.seatallocationService.addRegistrant(RegistrantElement)),
+                      finalize(() => {
+                        if (increamentedValue === totalRequests) {
+                          const eventID = response.data[0].Properties.$values.filter(ele1 => ele1.Name == 'EventID')[0].Value;
+                          const ordinal = response.data[0].Properties.$values.filter(ele1 => ele1.Name == 'Ordinal')[0].Value.$value;
+                          
+                          this.seatallocationService.getRegistrants(eventID, ordinal).subscribe(
+                            (RegistrantsResult: any) => {
+                              console.log('update session 1');
+                              this.updateSession(response, RegistrantsResult.length);
+                            },
+                            RegistrantsError => {
+                              this.toast.error("Something went wrong!! Please try again later!!", "Error");
+                            }
+                          );
                         }
-                      )
-                    })
+                      })
+                    ).subscribe(
+                      RegistrantResult => {
+                        increamentedValue += 1;
+                        this.progressPercentage = (increamentedValue / totalRequests) * 100;
+                      },
+                      RegistrantError => {
+                        this.toast.error("Something went wrong!! Please try again later!!", "Error");
+                      }
+                    );
+                    // RegistrantsDetails.map((RegistrantElement, RegistrantIndex) => {
+                    //   this.seatallocationService.addRegistrant(RegistrantElement).subscribe(
+                    //     RegistrantResult => {
+                    //       increamentedValue = increamentedValue + 1;
+                    //       if (increamentedValue == RegistrantsDetails.length) {
+                    //         this.seatallocationService.getRegistrants(response.data[0].Properties.$values.filter(ele1 => ele1.Name == 'EventID')[0].Value, response.data[0].Properties.$values.filter(ele1 => ele1.Name == 'Ordinal')[0].Value.$value).subscribe(
+                    //           (RegistrantsResult: any) => {
+                    //             console.log('update session 1')
+                    //             this.updateSession(response, RegistrantsResult.length);
+                    //           }, RegistrantsError => {
+                    //             this.toast.error("Something went wrong!! Please try again later!!", "Error");
+                    //           }
+                    //         )
+                    //       }
+                    //     }, RegistrantError => {
+                    //       this.toast.error("Something went wrong!! Please try again later!!", "Error");
+                    //     }
+                    //   )
+                    // })
                   }
                 })
               } else {
@@ -396,8 +426,9 @@ export class SeatAllocationComponent implements OnInit {
                 let uniqueOldRegistrants = this.advancedSessions[sessionIndex].allRegistrants.filter(x => !filteredResult.some(registrant => registrant.RegistrantID === x.RegistrantID));
                 let uniqueOldRegistrantsCount = 0;
                 if (uniqueOldRegistrants.length > 0) {
+                  console.log('delete registrant 1')
                   uniqueOldRegistrants.map(ele => {
-                    this.seatallocationService.deleteRegistrant(ele.Ordinal).subscribe(
+                    this.seatallocationService.deleteRegistrant(ele.Ordinal,this.selectedPartyId).subscribe(
                       deleteRegistrantResult => {
                         uniqueOldRegistrantsCount = uniqueOldRegistrantsCount + 1;
                         if (uniqueOldRegistrants.length == uniqueOldRegistrantsCount) {
@@ -724,8 +755,9 @@ export class SeatAllocationComponent implements OnInit {
               } else {
                 let increamentedValue = 0;
                 if (this.advancedSessions[sessionIndex].allRegistrants.length != 0) {
+                  console.log('delete registrant 2')
                   this.advancedSessions[sessionIndex].allRegistrants.map(ele => {
-                    this.seatallocationService.deleteRegistrant(ele.Ordinal).subscribe(
+                    this.seatallocationService.deleteRegistrant(ele.Ordinal,this.selectedPartyId).subscribe(
                       deleteRegistrantResult => {
                         increamentedValue = increamentedValue + 1;
                         if (increamentedValue == this.advancedSessions[sessionIndex].allRegistrants.length) {
@@ -821,18 +853,38 @@ export class SeatAllocationComponent implements OnInit {
                 })
               })
               let increamentedValue = 0;
-              updatedRegistrantsResult.map(ele => {
-                this.seatallocationService.deleteRegistrant(ele.Ordinal).subscribe(
-                  deleteRegistrantResult => {
-                    increamentedValue = increamentedValue + 1;
-                    if (increamentedValue == updatedRegistrantsResult.length) {
-                      this.getPrograms();
-                    }
-                  }, deleteRegistrantError => {
-                    this.toast.error("Something went wrong!! Please try again later!!", "Error");
+              console.log('delete registrant 4')
+              // updatedRegistrantsResult.map(ele => {
+              //   this.seatallocationService.deleteRegistrant(ele.Ordinal,this.selectedPartyId).subscribe(
+              //     deleteRegistrantResult => {
+              //       increamentedValue = increamentedValue + 1;
+              //       if (increamentedValue == updatedRegistrantsResult.length) {
+              //         this.getPrograms();
+              //       }
+              //     }, deleteRegistrantError => {
+              //       this.toast.error("Something went wrong!! Please try again later!!", "Error");
+              //     }
+              //   )
+              // })
+
+              // let increamentedValue = 0;
+              const totalRequests = updatedRegistrantsResult.length;
+
+              from(updatedRegistrantsResult).pipe(
+                concatMap(ele => this.seatallocationService.deleteRegistrant(ele.Ordinal, this.selectedPartyId))
+              ).subscribe(
+                deleteRegistrantResult => {
+                  increamentedValue = increamentedValue + 1;
+                  
+                  this.progressPercentage = (increamentedValue / totalRequests) * 100;
+                  if (increamentedValue === updatedRegistrantsResult.length) {
+                    this.getPrograms();
                   }
-                )
-              })
+                },
+                deleteRegistrantError => {
+                  this.toast.error("Something went wrong!! Please try again later!!", "Error");
+                }
+              );
             } else {
               this.isLoading = false;
             }
@@ -1587,6 +1639,7 @@ export class SeatAllocationComponent implements OnInit {
 
   // unallocated registrant from table
   async deleteRegistrantFromTable(sessionIndex, innerTableInner) {
+    console.log('delete step 1')
     this.isLoading = true;
     if (innerTableInner) {
       let registrantData = [{
@@ -1982,7 +2035,7 @@ export class SessionDialogComponent {
         this.seatallocationService.deleteSession(this.data.session.Ordinal,this.selectedPartyId).subscribe(
           result => {
             let increamentedValue = 0;
-            if (this.data.session.tables.length > 0) {
+            if (this.data.session.tables && this.data.session.tables.length &&this.data.session.tables.length > 0) {
               this.data.session.tables.map(ele => {
                 this.seatallocationService.deleteTable(ele.Ordinal,this.selectedPartyId).subscribe(
                   result1 => {

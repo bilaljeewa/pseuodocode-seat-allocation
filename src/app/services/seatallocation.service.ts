@@ -28,6 +28,7 @@ export class SeatallocationService {
       headers: new HttpHeaders({
         'Content-Type': 'application/json',
         'RequestVerificationToken': this.token
+        // using this at the time of run locally'RequestVerificationToken': this.token 
       })
     }
   }
@@ -42,7 +43,7 @@ export class SeatallocationService {
     const httpOptions = {
       headers: new HttpHeaders({
         'Content-Type': 'application/json',
-        'RequestVerificationToken': this.token
+ 'RequestVerificationToken': this.token
       })
     }
 
@@ -56,7 +57,7 @@ export class SeatallocationService {
     
     
     let url =  `api/Event?EventId=` + eventID;
-    return this.httpClient.get(url, httpOptions)
+    return this.httpClient.get(url, this.httpOptions)
       .pipe(map((res: any) => {
         return res.Items.$values;
       }));
@@ -80,11 +81,11 @@ export class SeatallocationService {
     const httpOptions = {
       headers: new HttpHeaders({
         'Content-Type': 'application/json',
-        'RequestVerificationToken': this.token
+ 'RequestVerificationToken': this.token
       })
     }
     let url =  `api/${this.envMode=='2017'?'Psc_Event_Session_2017' :'Psc_Event_Session'}?EventID=` + eventID;
-    return this.httpClient.get(url, httpOptions)
+    return this.httpClient.get(url, this.httpOptions)
       .pipe(map((res: any) => {
         return res.Items.$values
       }));
@@ -108,7 +109,7 @@ export class SeatallocationService {
     const httpOptions = {
       headers: new HttpHeaders({
         'Content-Type': 'application/json',
-        'RequestVerificationToken': this.token
+ 'RequestVerificationToken': this.token
       })
     }
     let postSessionData = {}
@@ -258,7 +259,7 @@ export class SeatallocationService {
     const httpOptions = {
       headers: new HttpHeaders({
         'Content-Type': 'application/json',
-        'RequestVerificationToken': this.token
+ 'RequestVerificationToken': this.token
       })
     }
     let postSessionData = {}
@@ -409,12 +410,12 @@ console.log(postSessionData)
     const httpOptions = {
       headers: new HttpHeaders({
         'Content-Type': 'application/json',
-        'RequestVerificationToken': this.token
+ 'RequestVerificationToken': this.token
       })
     }
     let url =  'api/Psc_Event_Session/' + sessionID;
     let url2017=  `api/Psc_Event_Session_2017/~`+selectedPartyId+'|' + sessionID;
-    return this.httpClient.delete(this.envMode == '2017'? url2017: url, httpOptions).pipe(map((res: any) => { return res; }));
+    return this.httpClient.delete(this.envMode == '2017'? url2017: url, this.httpOptions).pipe(map((res: any) => { return res; }));
   }
 
   private deleteFakedSession(sessionID): Observable<any> {
@@ -434,11 +435,11 @@ console.log(postSessionData)
     const httpOptions = {
       headers: new HttpHeaders({
         'Content-Type': 'application/json',
-        'RequestVerificationToken': this.token
+ 'RequestVerificationToken': this.token
       })
     }
     let url =  `api/${this.envMode=='2017'?'Psc_Event_Table_2017' :'Psc_Event_Table'}?EventID=` + eventID;
-    return this.httpClient.get(url, httpOptions)
+    return this.httpClient.get(url, this.httpOptions)
       .pipe(map((res: any) => {
         return res.Items.$values
       }));
@@ -670,7 +671,7 @@ console.log(postSessionData)
     const httpOptions = {
       headers: new HttpHeaders({
         'Content-Type': 'application/json',
-        'RequestVerificationToken': this.token
+ 'RequestVerificationToken': this.token
       })
     }
     let postTableData = {}
@@ -803,7 +804,7 @@ console.log(postSessionData)
     const httpOptions = {
       headers: new HttpHeaders({
         'Content-Type': 'application/json',
-        'RequestVerificationToken': this.token
+ 'RequestVerificationToken': this.token
       })
     }
     let postSessionData = {
@@ -937,13 +938,13 @@ console.log(postSessionData)
     const httpOptions = {
       headers: new HttpHeaders({
         'Content-Type': 'application/json',
-        'RequestVerificationToken': this.token
+ 'RequestVerificationToken': this.token
       })
     }
     console.log('delete 2')
     let url =  `api/Psc_Event_Table/` + tableID;
     let url2017=  `api/Psc_Event_Table_2017/~`+selectedPartyId+'|' + tableID;
-    return this.httpClient.delete(this.envMode == '2017'? url2017: url, httpOptions).pipe(map((res: any) => { return res; }));
+    return this.httpClient.delete(this.envMode == '2017'? url2017: url, this.httpOptions).pipe(map((res: any) => { return res; }));
   }
 
   private deleteFakedTable(tableID): Observable<any> {
@@ -963,11 +964,11 @@ console.log(postSessionData)
     const httpOptions = {
       headers: new HttpHeaders({
         'Content-Type': 'application/json',
-        'RequestVerificationToken': this.token
+ 'RequestVerificationToken': this.token
       })
     }
     let url =  `api/${this.envMode=='2017'?'Psc_Event_Session_2017' :'Psc_Event_Session'}?SessionTimeStamp=` + TimeStamp;
-    return this.httpClient.get(url, httpOptions)
+    return this.httpClient.get(url, this.httpOptions)
       .pipe(map((res: any) => {
         return res.Items.$values
       }));
@@ -1082,12 +1083,12 @@ console.log(postSessionData)
     const httpOptions = {
       headers: new HttpHeaders({
         'Content-Type': 'application/json',
-        'RequestVerificationToken': this.token
+ 'RequestVerificationToken': this.token
       })
     }
     let url =  'api/iqa?QueryName=$/PseudoCode/SeatPlanner/Pseudocode - Registrants by Program&parameter=' + programs + "&Limit=500";
     console.log(url);
-    return this.httpClient.get(url, httpOptions)
+    return this.httpClient.get(url, this.httpOptions)
       .pipe(map((res: any) => {
         return res.Items.$values
       }));
@@ -1111,7 +1112,7 @@ console.log(postSessionData)
     const httpOptions = {
       headers: new HttpHeaders({
         'Content-Type': 'application/json',
-        'RequestVerificationToken': this.token
+ 'RequestVerificationToken': this.token
       })
     }
     let url =  `api/${this.envMode=='2017'?'Psc_Event_Registrant_2017' :'Psc_Event_Registrant'}`;
@@ -1136,7 +1137,7 @@ console.log(postSessionData)
     const httpOptions = {
       headers: new HttpHeaders({
         'Content-Type': 'application/json',
-        'RequestVerificationToken': this.token
+'RequestVerificationToken': this.token
       })
     }
     let url;
@@ -1144,7 +1145,7 @@ console.log(postSessionData)
       url =  `api/${this.envMode=='2017'?'Psc_Event_Registrant_2017' :'Psc_Event_Registrant'}?EventID=` + eventID + '&SessionID=' + sessionID + '&Limit=500';
     else
       url =  `api/${this.envMode=='2017'?'Psc_Event_Registrant_2017' :'Psc_Event_Registrant'}?EventID=` + eventID + '&Limit=500';
-    return this.httpClient.get(url, httpOptions)
+    return this.httpClient.get(url, this.httpOptions)
       .pipe(map((res: any) => {
         return res.Items.$values
       }));
@@ -1169,7 +1170,7 @@ console.log(postSessionData)
     const httpOptions = {
       headers: new HttpHeaders({
         'Content-Type': 'application/json',
-        'RequestVerificationToken': this.token
+'RequestVerificationToken': this.token
       })
     }
 
@@ -1214,7 +1215,7 @@ console.log(postSessionData)
     }
     let url =  `api/Psc_Event_Registrant/` + data.registrantID;
     
-    let url2017=  `api/Psc_Event_Table_2017/~`+selectedPartyId+'|' +  data.registrantID;
+    let url2017=  `api/Psc_Event_Registrant_2017/~`+selectedPartyId+'|' +  data.registrantID;
     console.log('update registant',postRegistrantData)
     return this.httpClient.put(this.envMode=='2017'? url2017: url, postRegistrantData, httpOptions).pipe(map((res: Sessions) => { return res; }));
   }
@@ -1227,20 +1228,24 @@ console.log(postSessionData)
 
 
   // delete registrant starts
-  public deleteRegistrant(registrantID): Observable<any> {
-    if (this.live) return this.deleteLiveRegistrant(registrantID);
+  public deleteRegistrant(registrantID,selectedPartyId): Observable<any> {
+    if (this.live) return this.deleteLiveRegistrant(registrantID,selectedPartyId);
     else return this.deleteFakedRegistrant(registrantID);
   }
 
-  private deleteLiveRegistrant(registrantID): Observable<any> {
+  private deleteLiveRegistrant(registrantID,selectedPartyId): Observable<any> {
     const httpOptions = {
       headers: new HttpHeaders({
         'Content-Type': 'application/json',
-        'RequestVerificationToken': this.token
+'RequestVerificationToken': this.token
       })
     }
-    let url =  `api/${this.envMode=='2017'?'Psc_Event_Registrant_2017' :'Psc_Event_Registrant'}/` + registrantID;
-    return this.httpClient.delete(url, httpOptions).pipe(map((res: any) => { return res; }));
+    // let url =  `api/${this.envMode=='2017'?'Psc_Event_Registrant_2017' :'Psc_Event_Registrant'}/` + registrantID;
+
+    let url =  `api/Psc_Event_Registrant/` + registrantID;
+    
+    let url2017=  `api/Psc_Event_Registrant_2017/~`+selectedPartyId+'|' +  registrantID;
+    return this.httpClient.delete(this.envMode=='2017'? url2017: url, this.httpOptions).pipe(map((res: any) => { return res; }));
   }
 
   private deleteFakedRegistrant(registrantID): Observable<any> {

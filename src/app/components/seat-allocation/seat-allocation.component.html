@@ -1,6 +1,17 @@
 <div class="pseudoSeatAllocation">
+    
     <div class="form-wrap">
-        <ngx-loading [show]="isLoading"></ngx-loading>
+        
+            <div id="loading"  *ngIf="isLoading">
+                <div><i class="fa fa-spinner"></i> <span>Loading... {{ progressPercentage | number: '1.0-0' }}%</span></div>
+            </div>
+      
+        <!-- <ngx-loading [show]="isLoading || true">
+            <div >
+                <p>Loading... {{ progressPercentage | number: '1.0-0' }}%</p>
+              </div>
+        </ngx-loading> -->
+       
         <h1 class="heading-main mb-2 mb-sm-3 mb-md-4 text-center">Session</h1>
         <div class="button-wrap text-right mb-2 mb-md-3">
             <button mat-raised-button color="primary" (click)="openSessionDialog(); do($event);">
