@@ -16,7 +16,7 @@ import { concatMap,finalize } from 'rxjs/operators';
 })
 export class SeatAllocationComponent implements OnInit {
 
-  envMode='2017'
+  envMode='cloud'
   selectedPartyId= JSON.parse(document.getElementById('__ClientContext')['value']).selectedPartyId
   progressPercentage: number = 0;
 
@@ -1855,7 +1855,7 @@ export class SeatAllocationComponent implements OnInit {
 
   // open the print url in new tab
   openNewTab(sessionIndex) {
-    window.open(`/SeatAllocationReport?Event Code=${this.advancedSessions[sessionIndex].EventID}&SessionID=${this.advancedSessions[sessionIndex].Ordinal}`, "_blank");
+    window.open(`/staff/SeatAllocationReport?Event Code=${this.advancedSessions[sessionIndex].EventID}&SessionID=${this.advancedSessions[sessionIndex].Ordinal}`, "_blank");
   }
 }
 

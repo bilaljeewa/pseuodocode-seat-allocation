@@ -1,25 +1,25 @@
 {
 
     "/api/*": {
-        "target": "https://staff.imisconsulting.com.au/",
+        "target": "https://apdemoaisp16.imiscloud.com/",
         "secure": false,
         "logLevel": "debug",
         "changeOrigin": true
     },
     "/AsiCommon/*": {
-        "target": "https://staff.imisconsulting.com.au/",
+        "target": "https://apdemoaisp16.imiscloud.com/",
         "secure": false,
         "logLevel": "debug",
         "changeOrigin": true
     },
     "/assets/*": {
-        "target": "https://staff.imisconsulting.com.au/",
+        "target": "https://apdemoaisp16.imiscloud.com/",
         "secure": false,
         "logLevel": "debug",
         "changeOrigin": true
     },
     "/images/*": {
-        "target": "https://staff.imisconsulting.com.au/",
+        "target": "https://apdemoaisp16.imiscloud.com/",
         "secure": false,
         "logLevel": "debug",
         "changeOrigin": true

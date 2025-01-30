@@ -12,7 +12,7 @@ export class SeatallocationService {
   live: boolean = true;
   baseUrl: string;
   token: string;
-  envMode: string='2017'
+  envMode: string='cloud'
   httpOptions:any;
 
   constructor(private httpClient: HttpClient) {
@@ -27,7 +27,8 @@ export class SeatallocationService {
     this.httpOptions = {
       headers: new HttpHeaders({
         'Content-Type': 'application/json',
-        'RequestVerificationToken': this.token
+        'Authorization': `Bearer ${this.token}`
+        // 'RequestVerificationToken': this.token
         // using this at the time of run locally'RequestVerificationToken': this.token 
       })
     }
@@ -152,7 +153,7 @@ export class SeatallocationService {
         }
     }
       
-    let url =  `api/${this.envMode=='2017'?'Psc_Event_Session_2017' :'Psc_Event_Session7'}`;
+    let url =  `api/${this.envMode=='2017'?'Psc_Event_Session_2017' :'Psc_Event_Session'}`;
     console.log(postSessionData)
     return this.httpClient.post(url, postSessionData, httpOptions).pipe(map((res: Sessions) => { return res; }));
   }
