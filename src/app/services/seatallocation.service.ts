@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
-import { catchError, delay, map } from 'rxjs/operators';
+import { catchError, delay, map, mergeMap } from 'rxjs/operators';
 
 import { Programs, Sessions, IQARegistrant } from "../models/SeatAllocation";
 
@@ -110,7 +110,8 @@ export class SeatallocationService {
     const httpOptions = {
       headers: new HttpHeaders({
         'Content-Type': 'application/json',
- 'RequestVerificationToken': this.token
+//  'RequestVerificationToken': this.token
+'Authorization': `Bearer ${this.token}`
       })
     }
     let postSessionData = {}
@@ -154,7 +155,8 @@ export class SeatallocationService {
     }
       
     let url =  `api/${this.envMode=='2017'?'Psc_Event_Session_2017' :'Psc_Event_Session'}`;
-    console.log(postSessionData)
+    // console.log(postSessionData)
+    
     return this.httpClient.post(url, postSessionData, httpOptions).pipe(map((res: Sessions) => { return res; }));
   }
 
@@ -260,7 +262,8 @@ export class SeatallocationService {
     const httpOptions = {
       headers: new HttpHeaders({
         'Content-Type': 'application/json',
- 'RequestVerificationToken': this.token
+//  'RequestVerificationToken': this.token
+'Authorization': `Bearer ${this.token}`
       })
     }
     let postSessionData = {}
@@ -302,10 +305,10 @@ export class SeatallocationService {
         }
       }
     }
-console.log(postSessionData)
+// console.log(postSessionData)
     let url =  'api/Psc_Event_Session/' + data.sessionID;
     let url2017 =  'api/Psc_Event_Session_2017/~'+data.selectedPartyId+'|' + data.sessionID;
-    console.log(url2017)
+    // console.log(url2017)
     return this.httpClient.put(this.envMode == '2017'? url2017:url, postSessionData, httpOptions).pipe(map((res: Sessions) => { return res; }));
   }
 
@@ -672,8 +675,9 @@ console.log(postSessionData)
     const httpOptions = {
       headers: new HttpHeaders({
         'Content-Type': 'application/json',
- 'RequestVerificationToken': this.token
-      })
+//  'RequestVerificationToken': this.token
+'Authorization': `Bearer ${this.token}`
+})
     }
     let postTableData = {}
 
@@ -714,7 +718,7 @@ console.log(postSessionData)
         }
       }
     }
-    console.log('added table ',postTableData)
+    // console.log('added table ',postTableData)
     let url =  `api/${this.envMode=='2017'?'Psc_Event_Table_2017' :'Psc_Event_Table'}`;
     return this.httpClient.post(url, postTableData, httpOptions).pipe(map((res: Sessions) => { return res; }));
   }
@@ -805,7 +809,8 @@ console.log(postSessionData)
     const httpOptions = {
       headers: new HttpHeaders({
         'Content-Type': 'application/json',
- 'RequestVerificationToken': this.token
+//  'RequestVerificationToken': this.token
+'Authorization': `Bearer ${this.token}`
       })
     }
     let postSessionData = {
@@ -942,7 +947,7 @@ console.log(postSessionData)
  'RequestVerificationToken': this.token
       })
     }
-    console.log('delete 2')
+    // console.log('delete 2')
     let url =  `api/Psc_Event_Table/` + tableID;
     let url2017=  `api/Psc_Event_Table_2017/~`+selectedPartyId+'|' + tableID;
     return this.httpClient.delete(this.envMode == '2017'? url2017: url, this.httpOptions).pipe(map((res: any) => { return res; }));
@@ -1080,20 +1085,60 @@ console.log(postSessionData)
     else return this.getIQAFakedRegistrants(programs);
   }
 
+//   private getIQALiveRegistrants(programs): Observable<IQARegistrant[]> {
+//     const httpOptions = {
+//       headers: new HttpHeaders({
+//         'Content-Type': 'application/json',
+//  'RequestVerificationToken': this.token
+//       })
+//     }
+//     let url =  'api/iqa?QueryName=$/PseudoCode/SeatPlanner/Pseudocode - Registrants by Program&parameter=' + programs + "&Limit=500";
+//     // console.log(url);
+//     return this.httpClient.get(url, this.httpOptions)
+//       .pipe(map((res: any) => {
+//         return res.Items.$values
+//       }));
+//   }
+
+
+
   private getIQALiveRegistrants(programs): Observable<IQARegistrant[]> {
     const httpOptions = {
       headers: new HttpHeaders({
         'Content-Type': 'application/json',
- 'RequestVerificationToken': this.token
+        'RequestVerificationToken': this.token
       })
-    }
-    let url =  'api/iqa?QueryName=$/PseudoCode/SeatPlanner/Pseudocode - Registrants by Program&parameter=' + programs + "&Limit=500";
-    console.log(url);
-    return this.httpClient.get(url, this.httpOptions)
-      .pipe(map((res: any) => {
-        return res.Items.$values
-      }));
+    };
+  
+    let allRegistrants: IQARegistrant[] = [];
+  
+    const fetchBatch = (offset = 0, totalCount = 0): Observable<IQARegistrant[]> => {
+      let url = `api/iqa?QueryName=$/PseudoCode/SeatPlanner/Pseudocode - Registrants by Program&parameter=${programs}&Limit=500&Offset=${offset}`;
+  
+      return this.httpClient.get(url, this.httpOptions).pipe(
+        map((res: any) => ({
+          registrants: res.Items?.$values || [],
+          totalCount: res.TotalCount || 0
+        })),
+        mergeMap(({ registrants, totalCount }) => {
+          allRegistrants = [...allRegistrants, ...registrants];
+  
+          if (totalCount > allRegistrants.length) {
+            // Fetch next batch if totalCount is greater than fetched count
+            return fetchBatch(offset + 500, totalCount);
+          } else {
+            return of(allRegistrants);
+          }
+        })
+      );
+    };
+  
+    return fetchBatch();
   }
+  
+  
+
+
 
   private getIQAFakedRegistrants(programs): Observable<IQARegistrant[]> {
     let data = []
@@ -1113,7 +1158,8 @@ console.log(postSessionData)
     const httpOptions = {
       headers: new HttpHeaders({
         'Content-Type': 'application/json',
- 'RequestVerificationToken': this.token
+//  'RequestVerificationToken': this.token
+'Authorization': `Bearer ${this.token}`
       })
     }
     let url =  `api/${this.envMode=='2017'?'Psc_Event_Registrant_2017' :'Psc_Event_Registrant'}`;
@@ -1134,22 +1180,66 @@ console.log(postSessionData)
     else return this.getFakedRegistrants(eventID, sessionID);
   }
 
-  private getLiveRegistrants(eventID, sessionID): Observable<Sessions[]> {
+//   private getLiveRegistrants(eventID, sessionID): Observable<Sessions[]> {
+//     const httpOptions = {
+//       headers: new HttpHeaders({
+//         'Content-Type': 'application/json',
+// 'RequestVerificationToken': this.token
+//       })
+//     }
+//     let url;
+//     if (sessionID)
+//       url =  `api/${this.envMode=='2017'?'Psc_Event_Registrant_2017' :'Psc_Event_Registrant'}?EventID=` + eventID + '&SessionID=' + sessionID + '&Limit=500';
+//     else
+//       url =  `api/${this.envMode=='2017'?'Psc_Event_Registrant_2017' :'Psc_Event_Registrant'}?EventID=` + eventID + '&Limit=500';
+//     return this.httpClient.get(url, this.httpOptions)
+//       .pipe(map((res: any) => {
+//         return res.Items.$values
+//       }));
+//   }
+
+
+
+  private getLiveRegistrants(eventID, sessionID = null): Observable<Sessions[]> {
     const httpOptions = {
       headers: new HttpHeaders({
         'Content-Type': 'application/json',
-'RequestVerificationToken': this.token
+        'RequestVerificationToken': this.token
       })
-    }
-    let url;
+    };
+  
+    let allRegistrants: Sessions[] = [];
+  
+    const fetchBatch = (offset = 0, totalCount = 0): Observable<Sessions[]> => {
+      // let url = `api/iqa?QueryName=$/PseudoCode/SeatPlanner/Pseudocode - Registrants by Program&parameter=${programs}&Limit=500&Offset=${offset}`;
+  
+
+      let url='';
     if (sessionID)
-      url =  `api/${this.envMode=='2017'?'Psc_Event_Registrant_2017' :'Psc_Event_Registrant'}?EventID=` + eventID + '&SessionID=' + sessionID + '&Limit=500';
+      url =  `api/${this.envMode=='2017'?'Psc_Event_Registrant_2017' :'Psc_Event_Registrant'}?EventID=${eventID}&SessionID=${sessionID}&Limit=500&Offset=${offset}`;
     else
-      url =  `api/${this.envMode=='2017'?'Psc_Event_Registrant_2017' :'Psc_Event_Registrant'}?EventID=` + eventID + '&Limit=500';
-    return this.httpClient.get(url, this.httpOptions)
-      .pipe(map((res: any) => {
-        return res.Items.$values
-      }));
+      url =  `api/${this.envMode=='2017'?'Psc_Event_Registrant_2017' :'Psc_Event_Registrant'}?EventID=${eventID}&Limit=500&Offset=${offset}`;
+
+
+      return this.httpClient.get(url, this.httpOptions).pipe(
+        map((res: any) => ({
+          registrants: res.Items?.$values || [],
+          totalCount: res.TotalCount || 0
+        })),
+        mergeMap(({ registrants, totalCount }) => {
+          allRegistrants = [...allRegistrants, ...registrants];
+  
+          if (totalCount > allRegistrants.length) {
+            // Fetch next batch if totalCount is greater than fetched count
+            return fetchBatch(offset + 500, totalCount);
+          } else {
+            return of(allRegistrants);
+          }
+        })
+      );
+    };
+  
+    return fetchBatch();
   }
 
   private getFakedRegistrants(eventID, sessionID): Observable<Sessions[]> {
@@ -1171,8 +1261,9 @@ console.log(postSessionData)
     const httpOptions = {
       headers: new HttpHeaders({
         'Content-Type': 'application/json',
-'RequestVerificationToken': this.token
-      })
+// 'RequestVerificationToken': this.token
+'Authorization': `Bearer ${this.token}`
+})
     }
 
     let postRegistrantData = {}
@@ -1217,7 +1308,7 @@ console.log(postSessionData)
     let url =  `api/Psc_Event_Registrant/` + data.registrantID;
     
     let url2017=  `api/Psc_Event_Registrant_2017/~`+selectedPartyId+'|' +  data.registrantID;
-    console.log('update registant',postRegistrantData)
+    // console.log('update registant',postRegistrantData)
     return this.httpClient.put(this.envMode=='2017'? url2017: url, postRegistrantData, httpOptions).pipe(map((res: Sessions) => { return res; }));
   }
 

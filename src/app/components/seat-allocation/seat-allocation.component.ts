@@ -123,6 +123,7 @@ export class SeatAllocationComponent implements OnInit {
                 }))
           }
           this.programs = Functions.concat(RegistrationOptions);
+          console.log('start get session')
           this.getSessions();
         } else {
           this.isLoading = false;
@@ -136,9 +137,10 @@ export class SeatAllocationComponent implements OnInit {
 
   // fetch the sessions as per the current EventID
   async getSessions() {
+    console.log('get session 0')
     this.seatallocationService.getSessions(this.eventID).subscribe(
       result => {
-        
+        console.log('get session 1',result)
         this.advancedSessions = [];
         this.mainPanelIcon = -1;
         this.innerPanelIcon = -1;
@@ -233,7 +235,7 @@ export class SeatAllocationComponent implements OnInit {
           if (this.advancedSessions.length == index + 1) {
             // this.isLoading = false;
             this.advancedSessions.map((ele4, index4) => {
-              console.log(ele4['allocatedRegistrants']);
+              
               if (ele4['allocatedRegistrants'] && ele4['allocatedRegistrants'].length > 0) {
                 ele4['allocatedRegistrants'].map(ele1 => {
                   ele1['tableName'] = "";
@@ -253,7 +255,7 @@ export class SeatAllocationComponent implements OnInit {
         }
       )
     })
-    console.log(this.advancedSessions)
+    
   }
 
   // open dialog box to add/edit session
@@ -339,7 +341,6 @@ export class SeatAllocationComponent implements OnInit {
                     )
                   }
                   RegistrantsDetails.push(tempData)
-
                   
                   if (result.length == index + 1) {
                     let increamentedValue = 0;
@@ -353,7 +354,7 @@ export class SeatAllocationComponent implements OnInit {
                           
                           this.seatallocationService.getRegistrants(eventID, ordinal).subscribe(
                             (RegistrantsResult: any) => {
-                              console.log('update session 1');
+                              
                               this.updateSession(response, RegistrantsResult.length);
                             },
                             RegistrantsError => {
@@ -371,25 +372,25 @@ export class SeatAllocationComponent implements OnInit {
                         this.toast.error("Something went wrong!! Please try again later!!", "Error");
                       }
                     );
-                    // RegistrantsDetails.map((RegistrantElement, RegistrantIndex) => {
-                    //   this.seatallocationService.addRegistrant(RegistrantElement).subscribe(
-                    //     RegistrantResult => {
-                    //       increamentedValue = increamentedValue + 1;
-                    //       if (increamentedValue == RegistrantsDetails.length) {
-                    //         this.seatallocationService.getRegistrants(response.data[0].Properties.$values.filter(ele1 => ele1.Name == 'EventID')[0].Value, response.data[0].Properties.$values.filter(ele1 => ele1.Name == 'Ordinal')[0].Value.$value).subscribe(
-                    //           (RegistrantsResult: any) => {
-                    //             console.log('update session 1')
-                    //             this.updateSession(response, RegistrantsResult.length);
-                    //           }, RegistrantsError => {
-                    //             this.toast.error("Something went wrong!! Please try again later!!", "Error");
-                    //           }
-                    //         )
-                    //       }
-                    //     }, RegistrantError => {
-                    //       this.toast.error("Something went wrong!! Please try again later!!", "Error");
-                    //     }
-                    //   )
-                    // })
+                    RegistrantsDetails.map((RegistrantElement, RegistrantIndex) => {
+                      this.seatallocationService.addRegistrant(RegistrantElement).subscribe(
+                        RegistrantResult => {
+                          increamentedValue = increamentedValue + 1;
+                          if (increamentedValue == RegistrantsDetails.length) {
+                            this.seatallocationService.getRegistrants(response.data[0].Properties.$values.filter(ele1 => ele1.Name == 'EventID')[0].Value, response.data[0].Properties.$values.filter(ele1 => ele1.Name == 'Ordinal')[0].Value.$value).subscribe(
+                              (RegistrantsResult: any) => {
+                    
+                                this.updateSession(response, RegistrantsResult.length);
+                              }, RegistrantsError => {
+                                this.toast.error("Something went wrong!! Please try again later!!", "Error");
+                              }
+                            )
+                          }
+                        }, RegistrantError => {
+                          this.toast.error("Something went wrong!! Please try again later!!", "Error");
+                        }
+                      )
+                    })
                   }
                 })
               } else {
@@ -426,7 +427,7 @@ export class SeatAllocationComponent implements OnInit {
                 let uniqueOldRegistrants = this.advancedSessions[sessionIndex].allRegistrants.filter(x => !filteredResult.some(registrant => registrant.RegistrantID === x.RegistrantID));
                 let uniqueOldRegistrantsCount = 0;
                 if (uniqueOldRegistrants.length > 0) {
-                  console.log('delete registrant 1')
+                  
                   uniqueOldRegistrants.map(ele => {
                     this.seatallocationService.deleteRegistrant(ele.Ordinal,this.selectedPartyId).subscribe(
                       deleteRegistrantResult => {
@@ -492,7 +493,7 @@ export class SeatAllocationComponent implements OnInit {
 
                                 )
                               }
-                              console.log('resistant 2')
+                              
                               this.seatallocationService.addRegistrant(RegistrantsDetails).subscribe(
                                 addRegistrantResult => {
                                   uniqueOldRegistrantsCount = uniqueOldRegistrantsCount + 1;
@@ -563,7 +564,7 @@ export class SeatAllocationComponent implements OnInit {
                                           "Name": "SessionTimeStamp",
                                           "Value": response.data[0].Properties.$values.filter(ele5 => ele5.Name == 'SessionTimeStamp')[0].Value
                                         })
-                                        console.log('update session 2')
+                                        
                                         this.seatallocationService.updateSession({ sessionID: response.data[0].Properties.$values.filter(ele5 => ele5.Name == 'Ordinal')[0].Value.$value, session: sessionData ,selectedPartyId: this.selectedPartyId}).subscribe(
                                           result => {
                                             this.getPrograms();
@@ -659,7 +660,7 @@ export class SeatAllocationComponent implements OnInit {
                           ]
                         }
                       }
-                      console.log('resistant 3')
+                      
                       this.seatallocationService.addRegistrant(RegistrantsDetails).subscribe(
                         addRegistrantResult => {
                           uniqueOldRegistrantsCount = uniqueOldRegistrantsCount + 1;
@@ -730,7 +731,7 @@ export class SeatAllocationComponent implements OnInit {
                                   "Name": "SessionTimeStamp",
                                   "Value": response.data[0].Properties.$values.filter(ele5 => ele5.Name == 'SessionTimeStamp')[0].Value
                                 })
-                                console.log('update session 3')
+                                
                                 this.seatallocationService.updateSession({ sessionID: response.data[0].Properties.$values.filter(ele5 => ele5.Name == 'Ordinal')[0].Value.$value, session: sessionData ,selectedPartyId: this.selectedPartyId}).subscribe(
                                   result => {
                                     this.getPrograms();
@@ -755,7 +756,7 @@ export class SeatAllocationComponent implements OnInit {
               } else {
                 let increamentedValue = 0;
                 if (this.advancedSessions[sessionIndex].allRegistrants.length != 0) {
-                  console.log('delete registrant 2')
+                  
                   this.advancedSessions[sessionIndex].allRegistrants.map(ele => {
                     this.seatallocationService.deleteRegistrant(ele.Ordinal,this.selectedPartyId).subscribe(
                       deleteRegistrantResult => {
@@ -814,7 +815,7 @@ export class SeatAllocationComponent implements OnInit {
                             "Name": "SessionTimeStamp",
                             "Value": response.data[0].Properties.$values.filter(ele1 => ele1.Name == 'SessionTimeStamp')[0].Value
                           })
-                          console.log('update session 4')
+                          
                           this.seatallocationService.updateSession({ sessionID: response.data[0].Properties.$values.filter(ele1 => ele1.Name == 'Ordinal')[0].Value.$value, session: sessionData ,selectedPartyId: this.selectedPartyId}).subscribe(
                             result => {
                               this.getPrograms();
@@ -844,6 +845,8 @@ export class SeatAllocationComponent implements OnInit {
         this.isLoading = true;
         this.seatallocationService.getRegistrants(this.eventID, this.advancedSessions[sessionIndex].Ordinal).subscribe(
           result => {
+
+            console.log(result)
             if (result.length > 0) {
               let updatedRegistrantsResult = [];
               result.map((ele3: any, RegistrantsResultIndex) => {
@@ -853,7 +856,7 @@ export class SeatAllocationComponent implements OnInit {
                 })
               })
               let increamentedValue = 0;
-              console.log('delete registrant 4')
+              
               // updatedRegistrantsResult.map(ele => {
               //   this.seatallocationService.deleteRegistrant(ele.Ordinal,this.selectedPartyId).subscribe(
               //     deleteRegistrantResult => {
@@ -921,11 +924,11 @@ export class SeatAllocationComponent implements OnInit {
   // expansion panel code for future use starts
   // beforePanelClosed(panel){
   //   panel.isExpanded = false;
-  //   console.log("Panel going to close!");
+  //   
   // }
   // beforePanelOpened(panel){
   //   panel.isExpanded = true;
-  //   console.log("Panel going to  open!");
+  //   
   // }
   // expansion panel code for future use ends
 
@@ -1058,7 +1061,7 @@ export class SeatAllocationComponent implements OnInit {
       "Name": "SessionTimeStamp",
       "Value": response.data[0].Properties.$values.filter(ele1 => ele1.Name == 'SessionTimeStamp')[0].Value
     })
-    console.log('update session 5')
+    
     this.seatallocationService.updateSession({ sessionID: response.data[0].Properties.$values.filter(ele1 => ele1.Name == 'Ordinal')[0].Value.$value, session: sessionData ,selectedPartyId: this.selectedPartyId}).subscribe(
       result => {
         this.getPrograms();
@@ -1275,7 +1278,7 @@ export class SeatAllocationComponent implements OnInit {
                         "Name": "SessionTimeStamp",
                         "Value": this.advancedSessions[sessionIndex].SessionTimeStamp
                       })
-                      console.log('update session 6')
+                      
                       this.seatallocationService.updateSession({ sessionID: this.advancedSessions[sessionIndex].Ordinal, session: sessionData,selectedPartyId: this.selectedPartyId }).subscribe(
                         result => {
                           this.toast.success("Auto Assign All has been completed. Please wait while we are updating the records!!", "Success");
@@ -1443,7 +1446,7 @@ export class SeatAllocationComponent implements OnInit {
                         "Name": "SessionTimeStamp",
                         "Value": this.advancedSessions[sessionIndex].SessionTimeStamp
                       })
-                      console.log('update session 7')
+                      
                       this.seatallocationService.updateSession({ sessionID: this.advancedSessions[sessionIndex].Ordinal, session: sessionData ,selectedPartyId: this.selectedPartyId}).subscribe(
                         result => {
                           this.toast.success("Auto Assign has been completed. Please wait while we are updating the records!!", "Success");
@@ -1611,7 +1614,7 @@ export class SeatAllocationComponent implements OnInit {
                         "Name": "SessionTimeStamp",
                         "Value": this.advancedSessions[sessionIndex].SessionTimeStamp
                       })
-                      console.log('update session 8')
+                      
                       this.seatallocationService.updateSession({ sessionID: this.advancedSessions[sessionIndex].Ordinal, session: sessionData,selectedPartyId: this.selectedPartyId }).subscribe(
                         result => {
                           this.toast.success("Manual Assign has been completed. Please wait while we are updating the records!!", "Success");
@@ -1639,7 +1642,7 @@ export class SeatAllocationComponent implements OnInit {
 
   // unallocated registrant from table
   async deleteRegistrantFromTable(sessionIndex, innerTableInner) {
-    console.log('delete step 1')
+    
     this.isLoading = true;
     if (innerTableInner) {
       let registrantData = [{
@@ -1890,7 +1893,7 @@ export class SessionDialogComponent {
     private toast: ToastrService,
     private seatallocationService: SeatallocationService) {
     this.sessionPrograms = [];
-    console.log(this.selectedPartyId)
+    
 
     if (this.data.session) {
       this.SessionName = this.data.session.SessionName;
@@ -1979,6 +1982,7 @@ export class SessionDialogComponent {
     let currentTimeStamp = this.data.session ? this.data.session.SessionTimeStamp : Math.floor(Date.now() / 1000);
 
     if (this.data.session) {
+     
       this.seatallocationService.updateSession({ sessionID: this.data.session.Ordinal, session: sessionData ,selectedPartyId: this.selectedPartyId}).subscribe(
         result => {
           if (result) {
@@ -2241,15 +2245,15 @@ export class SessionTableDialogComponent {
 
   // delete the table
   onDelete() {
-    console.log('delete 0')
+   
     this.matSnackBar.open(`Delete ${this.data.sessionTable.TableName}?`, 'DELETE', { duration: 100000 })
       .onAction().subscribe(() => {
         this.isLoading = true;
-        console.log('delete 1')
+        
         this.seatallocationService.deleteTable(this.data.sessionTable.Ordinal,this.selectedPartyId).subscribe(
           result => {
 
-            console.log(this.data.sessionTable)
+            
            
 
             if ( this.data.sessionTable && this.data.sessionTable.tablesAllocatedRegistrants && this.data.sessionTable.tablesAllocatedRegistrants.length && this.data.sessionTable.tablesAllocatedRegistrants.length > 0) {
