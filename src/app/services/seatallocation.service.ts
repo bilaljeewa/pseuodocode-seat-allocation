@@ -12,7 +12,7 @@ export class SeatallocationService {
   live: boolean = true;
   baseUrl: string;
   token: string;
-  envMode: string='cloud'
+  envMode: string='2017'
   httpOptions:any;
 
   constructor(private httpClient: HttpClient) {
@@ -58,6 +58,7 @@ export class SeatallocationService {
     
     
     let url =  `api/Event?EventId=` + eventID;
+    console.log(url)
     return this.httpClient.get(url, this.httpOptions)
       .pipe(map((res: any) => {
         return res.Items.$values;
@@ -1079,6 +1080,44 @@ export class SeatallocationService {
 
 
 
+  getTableFunction(eventKey): Observable<any>{
+      let url = `api/iqa?QueryName=$/Pseudocode/SeatPlanner/Pseudocode - Table Functions&parameter=${eventKey}&Limit=500`;
+      return this.httpClient.get(url, this.httpOptions)
+    
+  }
+
+
+  getIQARegistrantsTableGuest(programs): Observable<IQARegistrant[]> {
+    
+  
+    let allRegistrants: IQARegistrant[] = [];
+  
+    const fetchBatch = (offset = 0, totalCount = 0): Observable<IQARegistrant[]> => {
+      let url = `api/iqa?QueryName=$/Pseudocode/SeatPlanner/Pseudocode - Registrants by Program Table Guests&parameter=${programs}&Limit=500&Offset=${offset}`;
+  
+      return this.httpClient.get(url, this.httpOptions).pipe(
+        map((res: any) => ({
+          registrants: res.Items?.$values || [],
+          totalCount: res.TotalCount || 0
+        })),
+        mergeMap(({ registrants, totalCount }) => {
+          allRegistrants = [...allRegistrants, ...registrants];
+  
+          if (totalCount > allRegistrants.length) {
+            // Fetch next batch if totalCount is greater than fetched count
+            return fetchBatch(offset + 500, totalCount);
+          } else {
+            return of(allRegistrants);
+          }
+        })
+      );
+    };
+  
+    return fetchBatch();
+  }
+
+
+
   // get registrants from IQA query starts
   public getIQARegistrants(programs): Observable<IQARegistrant[]> {
     if (this.live) return this.getIQALiveRegistrants(programs);
@@ -1123,6 +1162,7 @@ export class SeatallocationService {
         mergeMap(({ registrants, totalCount }) => {
           allRegistrants = [...allRegistrants, ...registrants];
   
+          
           if (totalCount > allRegistrants.length) {
             // Fetch next batch if totalCount is greater than fetched count
             return fetchBatch(offset + 500, totalCount);
@@ -1163,7 +1203,7 @@ export class SeatallocationService {
       })
     }
     let url =  `api/${this.envMode=='2017'?'Psc_Event_Registrant_2017' :'Psc_Event_Registrant'}`;
-    console.log('add new data',data)
+    // console.log('add new data',data)
     return this.httpClient.post(url, data, httpOptions).pipe(map((res: Sessions) => { return res; }));
   }
 

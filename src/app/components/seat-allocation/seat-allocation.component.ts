@@ -16,7 +16,7 @@ import { concatMap,finalize, tap } from 'rxjs/operators';
 })
 export class SeatAllocationComponent implements OnInit {
 
-  envMode='cloud'
+  envMode='2017'
   selectedPartyId= JSON.parse(document.getElementById('__ClientContext')['value']).selectedPartyId
   progressPercentage: number = 0;
 
@@ -97,8 +97,10 @@ export class SeatAllocationComponent implements OnInit {
 
   // fetch the programs as per the current EventID
   async getPrograms() {
+
     this.seatallocationService.getPrograms(this.eventID).subscribe(
       result => {
+        console.log(result)
         if (result.length > 0) {
           let Functions = new Array();
           let RegistrationOptions = new Array();
@@ -321,6 +323,7 @@ export class SeatAllocationComponent implements OnInit {
       
           try {
             let programNamesTableWithQuotes = await this.getTableFunctions();
+            
             if (programNamesTableWithQuotes) {
               const array1 = (programNamesTableWithQuotes as string).replace(/"/g, "").split(",");
               const array2 = programNamesWithQuotes.replace(/"/g, "").split(",");
