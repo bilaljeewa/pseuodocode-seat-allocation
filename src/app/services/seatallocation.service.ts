@@ -27,8 +27,8 @@ export class SeatallocationService {
     this.httpOptions = {
       headers: new HttpHeaders({
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${this.token}`
-        // 'RequestVerificationToken': this.token
+        'Authorization': `Bearer ${this.token}`   //this is only for local
+        // 'RequestVerificationToken': this.token   // this is for server
         // using this at the time of run locally'RequestVerificationToken': this.token 
       })
     }
@@ -44,7 +44,8 @@ export class SeatallocationService {
     const httpOptions = {
       headers: new HttpHeaders({
         'Content-Type': 'application/json',
- 'RequestVerificationToken': this.token
+        'Authorization': `Bearer ${this.token}`
+//  'RequestVerificationToken': this.token
       })
     }
 
@@ -58,7 +59,7 @@ export class SeatallocationService {
     
     
     let url =  `api/Event?EventId=` + eventID;
-    console.log(url)
+   
     return this.httpClient.get(url, this.httpOptions)
       .pipe(map((res: any) => {
         return res.Items.$values;
@@ -83,7 +84,8 @@ export class SeatallocationService {
     const httpOptions = {
       headers: new HttpHeaders({
         'Content-Type': 'application/json',
- 'RequestVerificationToken': this.token
+        'Authorization': `Bearer ${this.token}`
+//  'RequestVerificationToken': this.token
       })
     }
     let url =  `api/${this.envMode=='2017'?'Psc_Event_Session_2017' :'Psc_Event_Session'}?EventID=` + eventID;
@@ -156,7 +158,6 @@ export class SeatallocationService {
     }
       
     let url =  `api/${this.envMode=='2017'?'Psc_Event_Session_2017' :'Psc_Event_Session'}`;
-    // console.log(postSessionData)
     
     return this.httpClient.post(url, postSessionData, httpOptions).pipe(map((res: Sessions) => { return res; }));
   }
@@ -306,10 +307,10 @@ export class SeatallocationService {
         }
       }
     }
-// console.log(postSessionData)
+
     let url =  'api/Psc_Event_Session/' + data.sessionID;
     let url2017 =  'api/Psc_Event_Session_2017/~'+data.selectedPartyId+'|' + data.sessionID;
-    // console.log(url2017)
+   
     return this.httpClient.put(this.envMode == '2017'? url2017:url, postSessionData, httpOptions).pipe(map((res: Sessions) => { return res; }));
   }
 
@@ -415,7 +416,8 @@ export class SeatallocationService {
     const httpOptions = {
       headers: new HttpHeaders({
         'Content-Type': 'application/json',
- 'RequestVerificationToken': this.token
+        'Authorization': `Bearer ${this.token}`
+//  'RequestVerificationToken': this.token
       })
     }
     let url =  'api/Psc_Event_Session/' + sessionID;
@@ -440,7 +442,8 @@ export class SeatallocationService {
     const httpOptions = {
       headers: new HttpHeaders({
         'Content-Type': 'application/json',
- 'RequestVerificationToken': this.token
+//  'RequestVerificationToken': this.token
+ 'Authorization': `Bearer ${this.token}`
       })
     }
     let url =  `api/${this.envMode=='2017'?'Psc_Event_Table_2017' :'Psc_Event_Table'}?EventID=` + eventID;
@@ -719,7 +722,7 @@ export class SeatallocationService {
         }
       }
     }
-    // console.log('added table ',postTableData)
+    
     let url =  `api/${this.envMode=='2017'?'Psc_Event_Table_2017' :'Psc_Event_Table'}`;
     return this.httpClient.post(url, postTableData, httpOptions).pipe(map((res: Sessions) => { return res; }));
   }
@@ -945,10 +948,11 @@ export class SeatallocationService {
     const httpOptions = {
       headers: new HttpHeaders({
         'Content-Type': 'application/json',
- 'RequestVerificationToken': this.token
+//  'RequestVerificationToken': this.token
+ 'Authorization': `Bearer ${this.token}`
       })
     }
-    // console.log('delete 2')
+ 
     let url =  `api/Psc_Event_Table/` + tableID;
     let url2017=  `api/Psc_Event_Table_2017/~`+selectedPartyId+'|' + tableID;
     return this.httpClient.delete(this.envMode == '2017'? url2017: url, this.httpOptions).pipe(map((res: any) => { return res; }));
@@ -971,7 +975,8 @@ export class SeatallocationService {
     const httpOptions = {
       headers: new HttpHeaders({
         'Content-Type': 'application/json',
- 'RequestVerificationToken': this.token
+//  'RequestVerificationToken': this.token
+'Authorization': `Bearer ${this.token}`
       })
     }
     let url =  `api/${this.envMode=='2017'?'Psc_Event_Session_2017' :'Psc_Event_Session'}?SessionTimeStamp=` + TimeStamp;
@@ -1132,7 +1137,7 @@ export class SeatallocationService {
 //       })
 //     }
 //     let url =  'api/iqa?QueryName=$/PseudoCode/SeatPlanner/Pseudocode - Registrants by Program&parameter=' + programs + "&Limit=500";
-//     // console.log(url);
+//     
 //     return this.httpClient.get(url, this.httpOptions)
 //       .pipe(map((res: any) => {
 //         return res.Items.$values
@@ -1145,7 +1150,8 @@ export class SeatallocationService {
     const httpOptions = {
       headers: new HttpHeaders({
         'Content-Type': 'application/json',
-        'RequestVerificationToken': this.token
+        // 'RequestVerificationToken': this.token
+        'Authorization': `Bearer ${this.token}`
       })
     };
   
@@ -1203,7 +1209,7 @@ export class SeatallocationService {
       })
     }
     let url =  `api/${this.envMode=='2017'?'Psc_Event_Registrant_2017' :'Psc_Event_Registrant'}`;
-    // console.log('add new data',data)
+    
     return this.httpClient.post(url, data, httpOptions).pipe(map((res: Sessions) => { return res; }));
   }
 
@@ -1244,7 +1250,8 @@ export class SeatallocationService {
     const httpOptions = {
       headers: new HttpHeaders({
         'Content-Type': 'application/json',
-        'RequestVerificationToken': this.token
+        // 'RequestVerificationToken': this.token
+        'Authorization': `Bearer ${this.token}`
       })
     };
   
@@ -1348,7 +1355,7 @@ export class SeatallocationService {
     let url =  `api/Psc_Event_Registrant/` + data.registrantID;
     
     let url2017=  `api/Psc_Event_Registrant_2017/~`+selectedPartyId+'|' +  data.registrantID;
-    // console.log('update registant',postRegistrantData)
+   
     return this.httpClient.put(this.envMode=='2017'? url2017: url, postRegistrantData, httpOptions).pipe(map((res: Sessions) => { return res; }));
   }
 
@@ -1369,7 +1376,8 @@ export class SeatallocationService {
     const httpOptions = {
       headers: new HttpHeaders({
         'Content-Type': 'application/json',
-'RequestVerificationToken': this.token
+// 'RequestVerificationToken': this.token
+'Authorization': `Bearer ${this.token}`
       })
     }
     // let url =  `api/${this.envMode=='2017'?'Psc_Event_Registrant_2017' :'Psc_Event_Registrant'}/` + registrantID;

@@ -100,7 +100,7 @@ export class SeatAllocationComponent implements OnInit {
 
     this.seatallocationService.getPrograms(this.eventID).subscribe(
       result => {
-        console.log(result)
+       
         if (result.length > 0) {
           let Functions = new Array();
           let RegistrationOptions = new Array();
@@ -165,6 +165,7 @@ export class SeatAllocationComponent implements OnInit {
               } else {
                 this.advancedSessions[index][ele1.Name] = typeof (ele1.Value) == 'object' ? ele1.Value.$value : ele1.Value;
               }
+              this.advancedSessions[index]['multiSelectChecked']=false
             })
           })
           
@@ -324,8 +325,9 @@ export class SeatAllocationComponent implements OnInit {
           try {
             let programNamesTableWithQuotes = await this.getTableFunctions();
             
-            if (programNamesTableWithQuotes) {
-              const array1 = (programNamesTableWithQuotes as string).replace(/"/g, "").split(",");
+            if (programNamesTableWithQuotes ) {
+             
+              const array1 = programNamesTableWithQuotes && programNamesTableWithQuotes!= '' ? (programNamesTableWithQuotes as string)?.replace(/"/g, "").split(","):[];
               const array2 = programNamesWithQuotes.replace(/"/g, "").split(",");
               
               const insideTable = array2.filter(item => array1.includes(item));
@@ -334,6 +336,9 @@ export class SeatAllocationComponent implements OnInit {
               
       
               let RegistrantsDetails = [];
+console.log(insideTable)
+console.log(outsideTable)
+              
       
               if (insideTable.length) {
                 let result = await this.seatallocationService.getIQARegistrantsTableGuest('"' + insideTable.join('","') + '"').toPromise();
@@ -1503,17 +1508,24 @@ export class SeatAllocationComponent implements OnInit {
     
 //   }
 
+
+
+
 async updatedRegistrant(RegistrantsDetails, response) {
   let completedRequests = 0;
   const totalRequests = RegistrantsDetails.length;
-
+ 
+this.isLoading=true
   from(RegistrantsDetails).pipe(
     concatMap(Registrant => this.seatallocationService.addRegistrant(Registrant)),
     tap(() => {
+      this.isLoading=true
       completedRequests++;
       this.progressPercentage = (completedRequests / totalRequests) * 100;
     }),
     finalize(() => {
+      this.isLoading=false
+      
       if (completedRequests === totalRequests) {
         const eventID = response.data[0].Properties.$values.find(ele => ele.Name === "EventID")?.Value;
         const ordinal = response.data[0].Properties.$values.find(ele => ele.Name === "Ordinal")?.Value?.$value;
@@ -1539,11 +1551,20 @@ async updatedRegistrant(RegistrantsDetails, response) {
     return new Promise((resolve, reject) => {
       this.seatallocationService.getTableFunction(this.eventID).subscribe({
         next: (resp) => {
-          let programItems = resp.Items.$values[0].Properties.$values.find(
-            (prop) => prop.Name === "ProgramItems"
-          )?.Value;
           
-          resolve(programItems ? '"' + programItems.split(',').join('","') + '"' : []);
+          // let programItems = resp.Items.$values[0].Properties.$values.find(
+          //   (prop) => prop.Name === "ProgramItems"
+          // )?.Value;
+
+          let programItems2= resp.Items.$values.map(x=>{
+            return x.Properties.$values.find(
+              (prop) => prop.Name === "ProgramItems"
+            )?.Value;
+          })
+         
+
+
+          resolve(programItems2 ? '"' + programItems2.join('","') + '"' : []);
         },
         error: (error) => {
           console.error("Error fetching table functions", error);
