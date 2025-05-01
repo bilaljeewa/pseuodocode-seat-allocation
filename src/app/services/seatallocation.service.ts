@@ -14,9 +14,17 @@ export class SeatallocationService {
   token: string;
   envMode: string='2017'
   httpOptions:any;
+  selectedPartyIdIQA:any=""
 
   constructor(private httpClient: HttpClient) {
+    
     this.getContext();
+    if(this.envMode== '2017'){
+      this.getselectedPartyId().subscribe(resp=>{
+        this.selectedPartyIdIQA= resp.Items.$values[0].Properties.$values.find(val => val.Name == 'ID').Value
+     console.log(this.selectedPartyIdIQA)
+      })
+    }
   }
 
   private getContext() {
@@ -29,7 +37,7 @@ export class SeatallocationService {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${this.token}`   //this is only for local
         // 'RequestVerificationToken': this.token   // this is for server
-        // using this at the time of run locally'RequestVerificationToken': this.token 
+        // using this at the time of run locally'RequestVerificationsToken': this.token 
       })
     }
   }
@@ -49,12 +57,7 @@ export class SeatallocationService {
       })
     }
 
-    // httpOptions = {
-    //   headers: new HttpHeaders({
-    //     'Content-Type': 'application/json',
-    //     'RequestVerificationToken': this.token
-    //   })
-    // }
+    
 
     
     
@@ -309,7 +312,7 @@ export class SeatallocationService {
     }
 
     let url =  'api/Psc_Event_Session/' + data.sessionID;
-    let url2017 =  'api/Psc_Event_Session_2017/~'+data.selectedPartyId+'|' + data.sessionID;
+    let url2017 =  'api/Psc_Event_Session_2017/~'+this.selectedPartyIdIQA+'|' + data.sessionID;
    
     return this.httpClient.put(this.envMode == '2017'? url2017:url, postSessionData, httpOptions).pipe(map((res: Sessions) => { return res; }));
   }
@@ -420,8 +423,11 @@ export class SeatallocationService {
 //  'RequestVerificationToken': this.token
       })
     }
+    
     let url =  'api/Psc_Event_Session/' + sessionID;
-    let url2017=  `api/Psc_Event_Session_2017/~`+selectedPartyId+'|' + sessionID;
+    let url2017=  `api/Psc_Event_Session_2017/~`+this.selectedPartyIdIQA+'|' + sessionID;
+
+    
     return this.httpClient.delete(this.envMode == '2017'? url2017: url, this.httpOptions).pipe(map((res: any) => { return res; }));
   }
 
@@ -861,7 +867,7 @@ export class SeatallocationService {
     let url =  `api/Psc_Event_Table/` + data.tableID;
 
     
-    let url2017=  `api/Psc_Event_Table_2017/~`+data.selectedPartyId+'|' + data.tableID;
+    let url2017=  `api/Psc_Event_Table_2017/~`+this.selectedPartyIdIQA+'|' + data.tableID;
 
     return this.httpClient.put(this.envMode == '2017'? url2017:url, postSessionData, httpOptions).pipe(map((res: Sessions) => { return res; }));
   }
@@ -954,7 +960,7 @@ export class SeatallocationService {
     }
  
     let url =  `api/Psc_Event_Table/` + tableID;
-    let url2017=  `api/Psc_Event_Table_2017/~`+selectedPartyId+'|' + tableID;
+    let url2017=  `api/Psc_Event_Table_2017/~`+this.selectedPartyIdIQA+'|' + tableID;
     return this.httpClient.delete(this.envMode == '2017'? url2017: url, this.httpOptions).pipe(map((res: any) => { return res; }));
   }
 
@@ -1133,7 +1139,7 @@ export class SeatallocationService {
 //     const httpOptions = {
 //       headers: new HttpHeaders({
 //         'Content-Type': 'application/json',
-//  'RequestVerificationToken': this.token
+ 
 //       })
 //     }
 //     let url =  'api/iqa?QueryName=$/PseudoCode/SeatPlanner/Pseudocode - Registrants by Program&parameter=' + programs + "&Limit=500";
@@ -1230,7 +1236,7 @@ export class SeatallocationService {
 //     const httpOptions = {
 //       headers: new HttpHeaders({
 //         'Content-Type': 'application/json',
-// 'RequestVerificationToken': this.token
+ 
 //       })
 //     }
 //     let url;
@@ -1304,6 +1310,15 @@ export class SeatallocationService {
     else return this.updateFakedRegistrant(data);
   }
 
+
+
+
+  updateFakedRegistrantTimeout(data): Observable<Sessions> {
+    
+  
+    return of({ test: 'hello' } as unknown as Sessions).pipe(delay(2000));
+  }
+
   private updateLiveRegistrant(data,selectedPartyId): Observable<Sessions> {
     const httpOptions = {
       headers: new HttpHeaders({
@@ -1354,7 +1369,7 @@ export class SeatallocationService {
     }
     let url =  `api/Psc_Event_Registrant/` + data.registrantID;
     
-    let url2017=  `api/Psc_Event_Registrant_2017/~`+selectedPartyId+'|' +  data.registrantID;
+    let url2017=  `api/Psc_Event_Registrant_2017/~`+this.selectedPartyIdIQA+'|' +  data.registrantID;
    
     return this.httpClient.put(this.envMode=='2017'? url2017: url, postRegistrantData, httpOptions).pipe(map((res: Sessions) => { return res; }));
   }
@@ -1384,7 +1399,7 @@ export class SeatallocationService {
 
     let url =  `api/Psc_Event_Registrant/` + registrantID;
     
-    let url2017=  `api/Psc_Event_Registrant_2017/~`+selectedPartyId+'|' +  registrantID;
+    let url2017=  `api/Psc_Event_Registrant_2017/~`+this.selectedPartyIdIQA+'|' +  registrantID;
     return this.httpClient.delete(this.envMode=='2017'? url2017: url, this.httpOptions).pipe(map((res: any) => { return res; }));
   }
 
@@ -1392,4 +1407,12 @@ export class SeatallocationService {
     return of("").pipe(delay(500));
   }
   // delete registrant ends
+
+
+  getselectedPartyId(): Observable<any>{
+      let url = `api/iqa?QueryName=$/Pseudocode/SeatPlanner/Pseudocode - contactID`;
+      return this.httpClient.get(url, this.httpOptions)
+    
+  }
+  
 }

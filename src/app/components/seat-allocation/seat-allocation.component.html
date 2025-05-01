@@ -147,7 +147,7 @@
                                                                                     (change)="multiSelectCheckBoxes(i);">
                                                                                 </mat-checkbox>
                                                                             </td>
-                                                                            <td>{{ itemRow.RegistrantName }}
+                                                                            <td>{{ itemRow.DisplayName ? itemRow.DisplayName :itemRow.RegistrantName }}
                                                                             </td>
                                                                             <td>
                                                                                 <button (click)="do($event)" mat-icon-button color="primary"
@@ -179,7 +179,7 @@
                                                                     <tbody>
                                                                         <tr
                                                                             *ngFor="let itemRow of item.allocatedRegistrants;">
-                                                                            <td>{{ itemRow.RegistrantName }}</td>
+                                                                            <td>{{ itemRow.DisplayName ? itemRow.DisplayName :itemRow.RegistrantName }}</td>
                                                                             <td>{{ itemRow.tableName }}</td>
                                                                             <td>
                                                                                 <button (click)="do($event)" mat-icon-button color="primary"
@@ -198,7 +198,7 @@
                                                 </mat-tab>
                                             </mat-tab-group>
                                             <div class="refresh-btn">
-                                                <button (click)="do($event);" mat-icon-button color="primary">
+                                                <button (click)="do($event);refreshBtn(item)" mat-icon-button color="primary">
                                                     <fa-icon class="exclaim" [icon]="faSyncAlt"></fa-icon>
                                                 </button>
                                             </div>
@@ -319,10 +319,10 @@
                                                                         <td>
                                                                             <span
                                                                                 class="icon-wrap d-flex align-items-center justify-content-center">
-                                                                                {{ innerTableInner.RegistrantName | slice:0:2 }}
+                                                                                {{ innerTableInner.DisplayName ? innerTableInner.DisplayName :innerTableInner.RegistrantName | slice:0:2 }}
                                                                             </span>
                                                                         </td>
-                                                                        <td>{{ innerTableInner.RegistrantName }}</td>
+                                                                        <td>{{ innerTableInner.DisplayName ? innerTableInner.DisplayName :innerTableInner.RegistrantName }}</td>
                                                                         <td>
                                                                             <button (click)="do($event)" mat-icon-button color="primary"
                                                                                 [matTooltip]="innerTableInner.RegistrantName"
