@@ -3275,85 +3275,111 @@ this.isLoading=true
              await this.deleteDataSequentially(deleted)
             }
 
+// return false
+
+this.seatallocationService.getRegistrants(this.eventID, ele.Ordinal).subscribe(
+  result => {
+console.log(result)
+const unallocated = result.filter((r: any) => {
+  const tableIDProperty = r.Properties.$values.find(property => property.Name === "TableID");
+  return tableIDProperty && tableIDProperty.Value === "0"; // Unallocated items have TableID "0"
+});
+
+const allocated = result.filter((r: any) => {
+  const tableIDProperty = r.Properties.$values.find(property => property.Name === "TableID");
+  return tableIDProperty && tableIDProperty.Value !== "0"; // Allocated items have TableID not equal to "0"
+});
+
+
+console.log(unallocated)
+console.log(allocated)
+
+
+let sessionData = new Array();
+
+if(this.envMode=='2017'){
+  sessionData.push({
+    "$type":"Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+    "Name":"ContactKey",
+    "Value":this.selectedPartyId
+  })
+}
+sessionData.push({
+  "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+  "Name": "Ordinal",
+  "Value": { "$type": "System.Int32", "$value": ele.Ordinal}
+})
+sessionData.push({
+  "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+  "Name": "TotalUnallocated",
+  "Value": { "$type": "System.Int32", "$value": unallocated.length }
+})
+sessionData.push({
+  "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+  "Name": "TotalAllocated",
+  "Value": { "$type": "System.Int32", "$value": allocated.length}
+})
+sessionData.push({
+  "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+  "Name": "TotalSeats",
+  "Value": { "$type": "System.Int32", "$value": ele.TotalSeats }
+})
+sessionData.push({
+  "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+  "Name": "TotalTables",
+  "Value": { "$type": "System.Int32", "$value": ele.TotalTables }
+})
+sessionData.push({
+  "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+  "Name": "Programs",
+  "Value": ele.Programs.join(",") 
+})
+sessionData.push({
+  "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+  "Name": "SessionName",
+  "Value": ele.SessionName
+})
+sessionData.push({
+  "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+  "Name": "EventID",
+  "Value": ele.EventID
+})
+sessionData.push({
+  "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+  "Name": "SessionTimeStamp",
+  "Value": ele.SessionTimeStamp
+})
+
+
+
+
+this.seatallocationService.updateSession({ sessionID: ele.Ordinal, session: sessionData ,selectedPartyId: this.selectedPartyId}).subscribe(
+  result => {
+    this.getPrograms();
+    
+  }, error => {
+    this.toast.error("Something went wrong!! Please try again later!!", "Error");
+  }
+)
+
+
+
+
+  })
+            
+     
+  
+            
+
+//          let totalUnallocated=    ele.TotalUnallocated - deleted.length + inserted.length + updated.filter(item => item.old.TableID && item.old.TableID != "0").length;
+// let totalallocated = ele.TotalAllocated - updated.filter(item => item.old.TableID && item.old.TableID != "0").length
+
+
+
 
             
-            
-            
 
-         let totalUnallocated=    ele.TotalUnallocated - deleted.length + inserted.length + updated.filter(item => item.old.TableID && item.old.TableID != "0").length;
-let totalallocated = ele.TotalAllocated - updated.filter(item => item.old.TableID && item.old.TableID != "0").length
-
-
-
-
-            
-
-            let sessionData = new Array();
-
-            if(this.envMode=='2017'){
-              sessionData.push({
-                "$type":"Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
-                "Name":"ContactKey",
-                "Value":this.selectedPartyId
-              })
-            }
-            sessionData.push({
-              "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
-              "Name": "Ordinal",
-              "Value": { "$type": "System.Int32", "$value": ele.Ordinal}
-            })
-            sessionData.push({
-              "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
-              "Name": "TotalUnallocated",
-              "Value": { "$type": "System.Int32", "$value": totalUnallocated }
-            })
-            sessionData.push({
-              "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
-              "Name": "TotalAllocated",
-              "Value": { "$type": "System.Int32", "$value": totalallocated}
-            })
-            sessionData.push({
-              "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
-              "Name": "TotalSeats",
-              "Value": { "$type": "System.Int32", "$value": ele.TotalSeats }
-            })
-            sessionData.push({
-              "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
-              "Name": "TotalTables",
-              "Value": { "$type": "System.Int32", "$value": ele.TotalTables }
-            })
-            sessionData.push({
-              "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
-              "Name": "Programs",
-              "Value": ele.Programs.join(",") 
-            })
-            sessionData.push({
-              "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
-              "Name": "SessionName",
-              "Value": ele.SessionName
-            })
-            sessionData.push({
-              "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
-              "Name": "EventID",
-              "Value": ele.EventID
-            })
-            sessionData.push({
-              "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
-              "Name": "SessionTimeStamp",
-              "Value": ele.SessionTimeStamp
-            })
-
-
-            
-            
-            this.seatallocationService.updateSession({ sessionID: ele.Ordinal, session: sessionData ,selectedPartyId: this.selectedPartyId}).subscribe(
-              result => {
-                this.getPrograms();
-                
-              }, error => {
-                this.toast.error("Something went wrong!! Please try again later!!", "Error");
-              }
-            )
+         
 
 
 
@@ -3554,8 +3580,10 @@ async updateDataSequentially(items: any[]) {
     const Ordinal = items[i].old.Ordinal
 
     try {
-
-
+      const item = items[i].new;
+      const oldItem = items[i].old;
+      const tableId = oldItem.DisplayName != item.DisplayName ? "0" : oldItem.TableID;
+console.log(tableId)
       let registrantData = [{
         "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
         "Name": "Ordinal",
@@ -3625,7 +3653,7 @@ async updateDataSequentially(items: any[]) {
         "Name": "TableID",
         "Value": {
           "$type": "System.Int32",
-          "$value": 0
+          "$value": tableId
         }
       }]
 
